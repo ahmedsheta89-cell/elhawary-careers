@@ -6,7 +6,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { LucideIcon, MapPin, Phone, Mail, Clock } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock } from 'lucide-react';
 
 interface FooterLink {
   label: string;

@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/app/components/ui/button';
-import { Card, CardContent } from '@/app/components/ui/card';
+import { Card } from '@/app/components/ui/card';
 import { Input, Textarea } from '@/app/components/ui/input';
 import { FileUpload } from '@/app/components/ui/file-upload';
 import { MOCK_JOBS } from '@/services/mockData';
@@ -86,7 +86,7 @@ const ApplyPage: React.FC = () => {
 
         {/* Progress Steps */}
         <Card className="mb-8">
-          <CardContent padding="md">
+          <div className="p-6">
             <div className="flex items-center justify-between">
               {steps.map((step, index) => (
                 <React.Fragment key={step.number}>
@@ -122,12 +122,12 @@ const ApplyPage: React.FC = () => {
                 </React.Fragment>
               ))}
             </div>
-          </CardContent>
+          </div>
         </Card>
 
         {/* Form Card */}
         <Card>
-          <CardContent padding="lg">
+          <div className="p-8">
             <AnimatePresence mode="wait">
               {/* Step 1: Personal Information */}
               {currentStep === 1 && (
@@ -366,7 +366,7 @@ const ApplyPage: React.FC = () => {
                 </Button>
               )}
             </div>
-          </CardContent>
+          </div>
         </Card>
       </div>
     </div>

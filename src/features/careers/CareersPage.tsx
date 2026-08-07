@@ -7,13 +7,13 @@ import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/app/components/ui/button';
-import { Card, CardContent } from '@/app/components/ui/card';
+import { Card } from '@/app/components/ui/card';
 import { Badge } from '@/app/components/ui/badge';
 import { Input } from '@/app/components/ui/input';
 import { Select } from '@/app/components/ui/select';
 import { MOCK_JOBS, CATEGORY_LABELS, EXPERIENCE_LABELS, JOB_TYPE_LABELS } from '@/services/mockData';
 import { fadeAnimations, staggerContainer } from '@/styles/tokens.animation';
-import { Search, MapPin, Briefcase, DollarSign, Filter } from 'lucide-react';
+import { Search, MapPin, Briefcase, DollarSign } from 'lucide-react';
 
 const CareersPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -218,7 +218,7 @@ const CareersPage: React.FC = () => {
               {paginatedJobs.map((job) => (
                 <motion.div key={job.id} variants={fadeAnimations.fadeInUp}>
                   <Card hoverable className="h-full">
-                    <CardContent padding="md">
+                    <div className="p-6">
                       <div className="flex items-start justify-between mb-3">
                         <Badge variant="primary" size="sm">
                           {CATEGORY_LABELS[job.category]?.ar || job.category}
@@ -267,7 +267,7 @@ const CareersPage: React.FC = () => {
                           تفاصيل الوظيفة
                         </Link>
                       </Button>
-                    </CardContent>
+                    </div>
                   </Card>
                 </motion.div>
               ))}

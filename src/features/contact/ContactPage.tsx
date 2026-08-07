@@ -5,7 +5,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/app/components/ui/button';
-import { Card, CardContent } from '@/app/components/ui/card';
+import { Card } from '@/app/components/ui/card';
 import { Input, Textarea } from '@/app/components/ui/input';
 import { MapPin, Phone, Mail, Clock, MessageCircle, Send } from 'lucide-react';
 
@@ -108,7 +108,7 @@ const ContactPage: React.FC = () => {
 
               {/* WhatsApp CTA */}
               <Card>
-                <CardContent padding="md">
+                <div className="p-6">
                   <div className="text-center">
                     <MessageCircle className="w-12 h-12 text-success-500 mx-auto mb-3" />
                     <h3 className="font-semibold text-text-primary mb-2">
@@ -122,7 +122,7 @@ const ContactPage: React.FC = () => {
                       ابدأ المحادثة
                     </Button>
                   </div>
-                </CardContent>
+                </div>
               </Card>
             </motion.div>
 
@@ -135,7 +135,7 @@ const ContactPage: React.FC = () => {
               className="lg:col-span-2"
             >
               <Card>
-                <CardContent padding="lg">
+                <div className="p-8">
                   <h2 className="text-2xl font-bold text-text-primary mb-6">
                     أرسل لنا رسالة
                   </h2>
@@ -191,7 +191,7 @@ const ContactPage: React.FC = () => {
                       إرسال الرسالة
                     </Button>
                   </form>
-                </CardContent>
+                </div>
               </Card>
             </motion.div>
           </div>
