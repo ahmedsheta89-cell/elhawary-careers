@@ -31,7 +31,7 @@ const FileUpload = React.forwardRef<HTMLInputElement, FileUploadProps>(
       multiple = false,
       maxSize,
       onFileSelect,
-      id: propId,
+      id: _propId,
       ...props
     },
     ref
@@ -62,7 +62,7 @@ const FileUpload = React.forwardRef<HTMLInputElement, FileUploadProps>(
           handleFiles(files);
         }
       },
-      [disabled]
+      [disabled, handleFiles]
     );
 
     const handleFiles = (files: FileList) => {

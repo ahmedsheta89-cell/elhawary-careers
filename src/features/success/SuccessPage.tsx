@@ -4,15 +4,13 @@
  */
 
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/app/components/ui/button';
-import { Card, CardContent } from '@/app/components/ui/card';
+import { Card } from '@/app/components/ui/card';
 import { CheckCircle, MessageCircle, Home, Share2 } from 'lucide-react';
 
 const SuccessPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-success-50 to-success-100 flex items-center justify-center py-12" dir="rtl">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-lg">
@@ -22,7 +20,7 @@ const SuccessPage: React.FC = () => {
           transition={{ duration: 0.5, type: 'spring', stiffness: 200 }}
         >
           <Card className="text-center overflow-hidden">
-            <CardContent padding="lg" className="py-12">
+            <div className="p-8 py-12">
               {/* Animated Success Icon */}
               <motion.div
                 initial={{ scale: 0 }}
@@ -164,7 +162,7 @@ const SuccessPage: React.FC = () => {
               >
                 للاستفسارات: careers@elhawary.com | 01000000000
               </motion.p>
-            </CardContent>
+            </div>
           </Card>
         </motion.div>
       </div>

@@ -6,10 +6,10 @@ import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/app/components/ui/button';
-import { Card, CardContent } from '@/app/components/ui/card';
+import { Card } from '@/app/components/ui/card';
 import { Badge } from '@/app/components/ui/badge';
 import { MOCK_JOBS, CATEGORY_LABELS, EXPERIENCE_LABELS, JOB_TYPE_LABELS } from '@/services/mockData';
-import { MapPin, Briefcase, DollarSign, Clock, Users, CheckCircle } from 'lucide-react';
+import { MapPin, Briefcase, Clock, Users, CheckCircle } from 'lucide-react';
 
 const JobDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -84,15 +84,15 @@ const JobDetailsPage: React.FC = () => {
             <div className="lg:col-span-2 space-y-6">
               {/* Description */}
               <Card>
-                <CardContent padding="lg">
+                <div className="p-8">
                   <h2 className="text-xl font-semibold text-text-primary mb-4">وصف الوظيفة</h2>
                   <p className="text-text-secondary leading-relaxed">{job.description.ar}</p>
-                </CardContent>
+                </div>
               </Card>
 
               {/* Responsibilities */}
               <Card>
-                <CardContent padding="lg">
+                <div className="p-8">
                   <h2 className="text-xl font-semibold text-text-primary mb-4">المسؤوليات</h2>
                   <ul className="space-y-3">
                     {job.responsibilities.ar.map((item, index) => (
@@ -102,12 +102,12 @@ const JobDetailsPage: React.FC = () => {
                       </li>
                     ))}
                   </ul>
-                </CardContent>
+                </div>
               </Card>
 
               {/* Requirements */}
               <Card>
-                <CardContent padding="lg">
+                <div className="p-8">
                   <h2 className="text-xl font-semibold text-text-primary mb-4">المتطلبات</h2>
                   <ul className="space-y-3">
                     {job.requirements.ar.map((item, index) => (
@@ -117,7 +117,7 @@ const JobDetailsPage: React.FC = () => {
                       </li>
                     ))}
                   </ul>
-                </CardContent>
+                </div>
               </Card>
             </div>
 
@@ -126,7 +126,7 @@ const JobDetailsPage: React.FC = () => {
               {/* Apply Card - Sticky */}
               <div className="sticky top-24">
                 <Card>
-                  <CardContent padding="lg">
+                  <div className="p-8">
                     <h3 className="text-lg font-semibold text-text-primary mb-4">تفاصيل الوظيفة</h3>
                     
                     <div className="space-y-4 mb-6">
@@ -164,13 +164,13 @@ const JobDetailsPage: React.FC = () => {
                     <p className="text-xs text-text-muted text-center mt-4">
                       آخر موعد للتقديم: {new Date(job.expiryDate).toLocaleDateString('ar-EG')}
                     </p>
-                  </CardContent>
+                  </div>
                 </Card>
               </div>
 
               {/* Benefits */}
               <Card>
-                <CardContent padding="lg">
+                <div className="p-8">
                   <h3 className="text-lg font-semibold text-text-primary mb-4">المزايا</h3>
                   <ul className="space-y-2">
                     {job.benefits.map((benefit, index) => (
@@ -180,12 +180,12 @@ const JobDetailsPage: React.FC = () => {
                       </li>
                     ))}
                   </ul>
-                </CardContent>
+                </div>
               </Card>
 
               {/* Location */}
               <Card>
-                <CardContent padding="lg">
+                <div className="p-8">
                   <h3 className="text-lg font-semibold text-text-primary mb-4">مقر العمل</h3>
                   <div className="flex items-start gap-3 text-text-secondary">
                     <MapPin className="w-5 h-5 flex-shrink-0 mt-0.5" />
@@ -194,7 +194,7 @@ const JobDetailsPage: React.FC = () => {
                       <p>{job.location.city}, {job.location.governorate}</p>
                     </div>
                   </div>
-                </CardContent>
+                </div>
               </Card>
             </div>
           </div>

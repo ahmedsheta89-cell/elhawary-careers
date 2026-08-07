@@ -6,7 +6,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/app/components/ui/button';
-import { Card, CardContent } from '@/app/components/ui/card';
+import { Card } from '@/app/components/ui/card';
 import { Badge } from '@/app/components/ui/badge';
 import { BENEFITS_LIST } from '@/services/mockData';
 import { staggerContainer, fadeAnimations } from '@/styles/tokens.animation';
@@ -59,7 +59,7 @@ const BenefitsPage: React.FC = () => {
             {BENEFITS_LIST.map((benefit, index) => (
               <motion.div key={index} variants={fadeAnimations.fadeInUp}>
                 <Card hoverable className="h-full">
-                  <CardContent padding="lg">
+                  <div className="p-8">
                     <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 text-white flex items-center justify-center mb-6 shadow-lg">
                       {benefitIcons[benefit.icon] || <Heart className="w-8 h-8" />}
                     </div>
@@ -69,7 +69,7 @@ const BenefitsPage: React.FC = () => {
                     <p className="text-text-secondary leading-relaxed">
                       {benefit.description.ar}
                     </p>
-                  </CardContent>
+                  </div>
                 </Card>
               </motion.div>
             ))}
@@ -146,7 +146,7 @@ const BenefitsPage: React.FC = () => {
             ].map((item, index) => (
               <motion.div key={index} variants={fadeAnimations.fadeInUp}>
                 <Card className="h-full">
-                  <CardContent padding="md">
+                  <div className="p-6">
                     <div className="w-12 h-12 rounded-xl bg-secondary-100 text-secondary-600 flex items-center justify-center mb-4">
                       {item.icon}
                     </div>
@@ -156,7 +156,7 @@ const BenefitsPage: React.FC = () => {
                     <p className="text-sm text-text-secondary">
                       {item.description}
                     </p>
-                  </CardContent>
+                  </div>
                 </Card>
               </motion.div>
             ))}

@@ -6,7 +6,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/app/components/ui/button';
-import { Card, CardContent } from '@/app/components/ui/card';
+import { Card } from '@/app/components/ui/card';
 import { Badge } from '@/app/components/ui/badge';
 import { STATS } from '@/services/mockData';
 import { staggerContainer, fadeAnimations } from '@/styles/tokens.animation';
@@ -175,7 +175,7 @@ const AboutPage: React.FC = () => {
             ].map((value, index) => (
               <motion.div key={index} variants={fadeAnimations.fadeInUp}>
                 <Card hoverable className="h-full">
-                  <CardContent padding="lg">
+                  <div className="p-8">
                     <div className="w-14 h-14 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center mb-4">
                       {value.icon}
                     </div>
@@ -185,7 +185,7 @@ const AboutPage: React.FC = () => {
                     <p className="text-text-secondary leading-relaxed">
                       {value.description}
                     </p>
-                  </CardContent>
+                  </div>
                 </Card>
               </motion.div>
             ))}
