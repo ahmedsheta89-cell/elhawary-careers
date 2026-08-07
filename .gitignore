@@ -1,17 +1,18 @@
 ```
-# Dependencies
-node_modules/
-
 # Build outputs
 dist/
 build/
-.next/
-out/
+*.js.map
+*.ts.map
+*.d.ts
+
+# Dependencies
+node_modules/
 
 # Environment variables
 .env
 .env.local
-.env.*
+*.env.*
 
 # IDE files
 .vscode/
@@ -22,21 +23,11 @@ out/
 # Logs
 *.log
 
-# Temporary files
-*.tmp
-
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
 # Coverage
 coverage/
 htmlcov/
-.coverage
+*.coverage
 
-# OS
-.DS_Store
-Thumbs.db
+# Temporary files
+*.tmp
 ```
