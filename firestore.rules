@@ -1,0 +1,50 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    match /jobs/{jobId} {
+      allow read: if true;
+      allow write: if isAdmin(request.auth.uid);
+    }
+    
+    match /applications/{applicationId} {
+      allow create: if request.auth == null
+        && request.resource.data.keys().hasOnly([
+          'jobId', 'jobTitle', 'fullName', 'email', 'phone',
+          'education', 'graduationYear', 'experienceYears',
+          'message', 'cvUrl', 'cvFileName', 'status', 'submittedAt'
+        ])
+        && request.resource.data.status == 'pending'
+        && request.resource.data.submittedAt is timestamp
+        && isValidApplication(request.resource.data);
+      
+      allow read, update: if isAdmin(request.auth.uid);
+      allow delete: if false;
+    }
+    
+    match /admins/{uid} {
+      allow read, write: if isAdmin(request.auth.uid);
+    }
+    
+    match /settings/{document} {
+      allow read, write: if isAdmin(request.auth.uid);
+    }
+    
+    function isAdmin(uid) {
+      return uid != null && 
+        get(/databases/$(database)/documents/admins/$(uid)).data.role in ['admin', 'manager'];
+    }
+    
+    function isValidApplication(data) {
+      return 
+        data.fullName is string && data.fullName.size() > 0 && data.fullName.size() < 101
+        && data.phone is string && data.phone.size() > 7 && data.phone.size() < 21
+        && data.email is string && data.email.matches('^[^@]+@[^@]+\\.[^@]+$')
+        && data.education is string && data.education.size() > 1 && data.education.size() < 201
+        && data.graduationYear is number && data.graduationYear >= 1900 && data.graduationYear <= 2100
+        && data.experienceYears is number && data.experienceYears >= 0 && data.experienceYears <= 50
+        && data.jobId is string && data.jobId.size() > 0
+        && data.message is string && data.message.size() > 9 && data.message.size() < 1001;
+    }
+  }
+}
