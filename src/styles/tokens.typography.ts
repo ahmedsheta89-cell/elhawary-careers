@@ -4,11 +4,12 @@
 
 export const fontFamily = {
   // Arabic font stack (optimized for RTL)
-  arabic: "'IBM Plex Sans Arabic', 'Tajawal', 'Noto Sans Arabic', system-ui, -apple-system, sans-serif",
-  
+  arabic:
+    "'IBM Plex Sans Arabic', 'Tajawal', 'Noto Sans Arabic', system-ui, -apple-system, sans-serif",
+
   // English font stack
   english: "'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
-  
+
   // Monospace for code
   mono: "'JetBrains Mono', 'Fira Code', monospace",
 } as const;

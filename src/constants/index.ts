@@ -18,10 +18,25 @@ export const ROUTES = {
 // Navigation items
 export const NAVIGATION_ITEMS = [
   { key: 'home', path: ROUTES.HOME, labelAr: 'الرئيسية', labelEn: 'Home' },
-  { key: 'careers', path: ROUTES.CAREERS, labelAr: 'الوظائف', labelEn: 'Careers' },
-  { key: 'benefits', path: ROUTES.BENEFITS, labelAr: 'المزايا', labelEn: 'Benefits' },
+  {
+    key: 'careers',
+    path: ROUTES.CAREERS,
+    labelAr: 'الوظائف',
+    labelEn: 'Careers',
+  },
+  {
+    key: 'benefits',
+    path: ROUTES.BENEFITS,
+    labelAr: 'المزايا',
+    labelEn: 'Benefits',
+  },
   { key: 'about', path: ROUTES.ABOUT, labelAr: 'من نحن', labelEn: 'About' },
-  { key: 'contact', path: ROUTES.CONTACT, labelAr: 'اتصل بنا', labelEn: 'Contact' },
+  {
+    key: 'contact',
+    path: ROUTES.CONTACT,
+    labelAr: 'اتصل بنا',
+    labelEn: 'Contact',
+  },
 ] as const;
 
 // Job categories
@@ -36,7 +51,12 @@ export const JOB_CATEGORIES = [
 ] as const;
 
 // Job types
-export const JOB_TYPES = ['full-time', 'part-time', 'contract', 'internship'] as const;
+export const JOB_TYPES = [
+  'full-time',
+  'part-time',
+  'contract',
+  'internship',
+] as const;
 
 // Experience levels
 export const EXPERIENCE_LEVELS = ['entry', 'mid', 'senior', 'lead'] as const;

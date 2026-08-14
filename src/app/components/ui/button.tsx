@@ -1,7 +1,4 @@
-/**
- * Button Component
- * Reusable button with multiple variants and sizes
- */
+/* eslint-disable react-refresh/only-export-components */
 
 import React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
@@ -18,10 +15,11 @@ const buttonVariants = cva(
           'bg-secondary-600 text-white hover:bg-secondary-700 active:bg-secondary-800 shadow-md hover:shadow-lg',
         outline:
           'border-2 border-primary-600 text-primary-600 hover:bg-primary-50 active:bg-primary-100',
-        ghost:
-          'text-primary-600 hover:bg-primary-50 active:bg-primary-100',
+        ghost: 'text-primary-600 hover:bg-primary-50 active:bg-primary-100',
         danger:
           'bg-danger-500 text-white hover:bg-danger-600 active:bg-danger-700',
+        success:
+          'bg-success-600 text-white hover:bg-success-700 active:bg-success-800',
         neutral:
           'bg-neutral-200 text-neutral-800 hover:bg-neutral-300 active:bg-neutral-400',
       },
@@ -40,12 +38,14 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   loading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   fullWidth?: boolean;
+  asChild?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -60,26 +60,38 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       rightIcon,
       children,
       fullWidth = false,
+      asChild = false,
       ...props
     },
     ref
   ) => {
+    const resolvedClassName = cn(
+      buttonVariants({ variant, size }),
+      fullWidth && 'w-full',
+      className
+    );
+
+    if (asChild && React.isValidElement(children)) {
+      const child = children as React.ReactElement<{ className?: string }>;
+      return React.cloneElement(child, {
+        className: cn(resolvedClassName, child.props.className),
+      });
+    }
+
     return (
       <button
-        className={cn(
-          buttonVariants({ variant, size, className }),
-          fullWidth && 'w-full'
-        )}
+        className={resolvedClassName}
         ref={ref}
         disabled={disabled || loading}
         {...props}
       >
         {loading ? (
           <svg
-            className="animate-spin h-5 w-5"
+            className="h-5 w-5 animate-spin"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
+            aria-hidden="true"
           >
             <circle
               className="opacity-25"

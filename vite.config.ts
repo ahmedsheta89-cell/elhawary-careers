@@ -21,6 +21,7 @@ export default defineConfig({
           motion: ['framer-motion'],
           ui: ['lucide-react', 'class-variance-authority', 'clsx', 'tailwind-merge'],
           forms: ['react-hook-form', '@hookform/resolvers', 'zod'],
+          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
         },
       },
     },
@@ -28,5 +29,6 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
+    allowedHosts: ['localhost', '.manus.computer'],
   },
 })

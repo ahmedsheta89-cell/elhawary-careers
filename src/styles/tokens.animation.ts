@@ -30,25 +30,25 @@ export const fadeAnimations = {
     animate: { opacity: 1 },
     exit: { opacity: 0 },
   } as AnimationVariants,
-  
+
   fadeInUp: {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: 20 },
   } as AnimationVariants,
-  
+
   fadeInDown: {
     initial: { opacity: 0, y: -20 },
     animate: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -20 },
   } as AnimationVariants,
-  
+
   fadeInLeft: {
     initial: { opacity: 0, x: -20 },
     animate: { opacity: 1, x: 0 },
     exit: { opacity: 0, x: -20 },
   } as AnimationVariants,
-  
+
   fadeInRight: {
     initial: { opacity: 0, x: 20 },
     animate: { opacity: 1, x: 0 },
@@ -63,19 +63,19 @@ export const slideAnimations = {
     animate: { y: 0 },
     exit: { y: '100%' },
   } as AnimationVariants,
-  
+
   slideDown: {
     initial: { y: '-100%' },
     animate: { y: 0 },
     exit: { y: '-100%' },
   } as AnimationVariants,
-  
+
   slideLeft: {
     initial: { x: '100%' },
     animate: { x: 0 },
     exit: { x: '100%' },
   } as AnimationVariants,
-  
+
   slideRight: {
     initial: { x: '-100%' },
     animate: { x: 0 },
@@ -90,16 +90,20 @@ export const scaleAnimations = {
     animate: { scale: 1, opacity: 1 },
     exit: { scale: 0.9, opacity: 0 },
   } as AnimationVariants,
-  
+
   scaleUp: {
     initial: { scale: 0.8, opacity: 0 },
     animate: { scale: 1, opacity: 1 },
     exit: { scale: 0.8, opacity: 0 },
   } as AnimationVariants,
-  
+
   popIn: {
     initial: { scale: 0.5, opacity: 0 },
-    animate: { scale: 1, opacity: 1, transition: { type: 'spring', stiffness: 300, damping: 20 } },
+    animate: {
+      scale: 1,
+      opacity: 1,
+      transition: { type: 'spring', stiffness: 300, damping: 20 },
+    },
     exit: { scale: 0.5, opacity: 0 },
   } as AnimationVariants,
 } as const;
@@ -132,14 +136,14 @@ export const hoverAnimations = {
     whileHover: { y: -4, transition: { duration: duration.fast / 1000 } },
     whileTap: { y: -2 },
   },
-  
+
   glow: {
-    whileHover: { 
+    whileHover: {
       boxShadow: '0 0 20px rgba(37, 99, 235, 0.5)',
       transition: { duration: duration.fast / 1000 },
     },
   },
-  
+
   expand: {
     whileHover: { scale: 1.02, transition: { duration: duration.fast / 1000 } },
   },
@@ -157,7 +161,7 @@ export const loadingAnimations = {
       },
     },
   },
-  
+
   shimmer: {
     animate: {
       backgroundPosition: ['200% 0', '-200% 0'],

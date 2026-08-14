@@ -7,7 +7,7 @@ export const config = {
   // Application
   appName: 'El Hawary Careers',
   appTagline: 'صيدلية الهواري',
-  
+
   // Branding
   brand: {
     name: 'El Hawary Pharmacy',

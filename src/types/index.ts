@@ -19,7 +19,8 @@ export type JobCategory = (typeof JOB_CATEGORIES)[number];
 export type JobType = (typeof JOB_TYPES)[number];
 export type ExperienceLevel = (typeof EXPERIENCE_LEVELS)[number];
 export type EducationLevel = (typeof EDUCATION_LEVELS)[number];
-export type ApplicationStatus = (typeof APPLICATION_STATUS)[keyof typeof APPLICATION_STATUS];
+export type ApplicationStatus =
+  (typeof APPLICATION_STATUS)[keyof typeof APPLICATION_STATUS];
 
 // Location
 export interface Location {
@@ -204,11 +205,9 @@ export interface NavItem {
 }
 
 // Theme types
-export type ThemeColor = 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info';
+export type ThemeColor =
+  'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info';
 
 // Animation types
-export interface AnimationVariants {
-  initial: Record<string, unknown>;
-  animate: Record<string, unknown>;
-  exit?: Record<string, unknown>;
-}
+import type { Variants } from 'framer-motion';
+export type AnimationVariants = Variants;

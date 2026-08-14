@@ -57,4 +57,7 @@ yarn-error.log*
 .mypy_cache/
 .pytest_cache/
 coverage.xml
-```
+
+# Firebase local state
+.firebase/
+.firebaserc

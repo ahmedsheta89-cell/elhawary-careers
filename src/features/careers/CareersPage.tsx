@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { useJobs } from '@/hooks/useJobs';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/app/components/ui/button';
@@ -11,7 +12,11 @@ import { Card } from '@/app/components/ui/card';
 import { Badge } from '@/app/components/ui/badge';
 import { Input } from '@/app/components/ui/input';
 import { Select } from '@/app/components/ui/select';
-import { MOCK_JOBS, CATEGORY_LABELS, EXPERIENCE_LABELS, JOB_TYPE_LABELS } from '@/services/mockData';
+import {
+  CATEGORY_LABELS,
+  EXPERIENCE_LABELS,
+  JOB_TYPE_LABELS,
+} from '@/services/mockData';
 import { fadeAnimations, staggerContainer } from '@/styles/tokens.animation';
 import { Search, MapPin, Briefcase, DollarSign } from 'lucide-react';
 
@@ -23,26 +28,44 @@ const CareersPage: React.FC = () => {
   const [experienceFilter, setExperienceFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
+  const { jobs, isLoading, error, reload } = useJobs();
 
   // Extract unique locations
   const locations = useMemo(() => {
-    const uniqueLocations = [...new Set(MOCK_JOBS.map(job => job.location.city))];
+    const uniqueLocations = [...new Set(jobs.map((job) => job.location.city))];
     return uniqueLocations;
-  }, []);
+  }, [jobs]);
 
   // Filter jobs
   const filteredJobs = useMemo(() => {
-    return MOCK_JOBS.filter(job => {
-      const matchesSearch = job.title.ar.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    return jobs.filter((job) => {
+      const matchesSearch =
+        job.title.ar.toLowerCase().includes(searchTerm.toLowerCase()) ||
         job.description.ar.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = categoryFilter === 'all' || job.category === categoryFilter;
-      const matchesLocation = locationFilter === 'all' || job.location.city === locationFilter;
+      const matchesCategory =
+        categoryFilter === 'all' || job.category === categoryFilter;
+      const matchesLocation =
+        locationFilter === 'all' || job.location.city === locationFilter;
       const matchesType = typeFilter === 'all' || job.type === typeFilter;
-      const matchesExperience = experienceFilter === 'all' || job.experienceLevel === experienceFilter;
-      
-      return matchesSearch && matchesCategory && matchesLocation && matchesType && matchesExperience;
+      const matchesExperience =
+        experienceFilter === 'all' || job.experienceLevel === experienceFilter;
+
+      return (
+        matchesSearch &&
+        matchesCategory &&
+        matchesLocation &&
+        matchesType &&
+        matchesExperience
+      );
     });
-  }, [searchTerm, categoryFilter, locationFilter, typeFilter, experienceFilter]);
+  }, [
+    jobs,
+    searchTerm,
+    categoryFilter,
+    locationFilter,
+    typeFilter,
+    experienceFilter,
+  ]);
 
   // Pagination
   const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
@@ -54,7 +77,13 @@ const CareersPage: React.FC = () => {
   // Reset to page 1 when filters change
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, categoryFilter, locationFilter, typeFilter, experienceFilter]);
+  }, [
+    searchTerm,
+    categoryFilter,
+    locationFilter,
+    typeFilter,
+    experienceFilter,
+  ]);
 
   const categoryOptions = [
     { value: 'all', label: 'جميع الأقسام' },
@@ -66,7 +95,7 @@ const CareersPage: React.FC = () => {
 
   const locationOptions = [
     { value: 'all', label: 'جميع المدن' },
-    ...locations.map(city => ({ value: city, label: city })),
+    ...locations.map((city) => ({ value: city, label: city })),
   ];
 
   const typeOptions = [
@@ -85,21 +114,44 @@ const CareersPage: React.FC = () => {
     })),
   ];
 
+  if (isLoading) {
+    return (
+      <div
+        className="bg-background-alternate flex min-h-screen items-center justify-center"
+        dir="rtl"
+      >
+        <p className="text-text-secondary">جاري تحميل الوظائف...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div
+        className="bg-background-alternate flex min-h-screen flex-col items-center justify-center gap-4"
+        dir="rtl"
+      >
+        <p className="text-danger-600">{error}</p>
+        <Button onClick={() => void reload()}>إعادة المحاولة</Button>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-background-alternate" dir="rtl">
+    <div className="bg-background-alternate min-h-screen" dir="rtl">
       {/* Header */}
-      <section className="bg-gradient-to-br from-primary-700 to-primary-900 text-white py-16 md:py-24">
+      <section className="bg-gradient-to-br from-primary-700 to-primary-900 py-16 text-white md:py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center max-w-3xl mx-auto"
+            className="mx-auto max-w-3xl text-center"
           >
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            <h1 className="mb-4 text-4xl font-bold md:text-5xl">
               الوظائف المتاحة
             </h1>
-            <p className="text-primary-100 text-lg">
+            <p className="text-lg text-primary-100">
               اكتشف فرص عملك التالية في صيدلية الهواري
             </p>
           </motion.div>
@@ -107,16 +159,16 @@ const CareersPage: React.FC = () => {
       </section>
 
       {/* Filters Section */}
-      <section className="bg-white border-b border-border-default sticky top-16 z-20 shadow-sm">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col lg:flex-row gap-4">
+      <section className="border-border-default sticky top-16 z-20 border-b bg-white shadow-sm">
+        <div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-4 lg:flex-row">
             {/* Search */}
             <div className="flex-1">
               <Input
                 placeholder="ابحث عن وظيفة..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                leftIcon={<Search className="w-5 h-5" />}
+                leftIcon={<Search className="h-5 w-5" />}
               />
             </div>
 
@@ -155,10 +207,14 @@ const CareersPage: React.FC = () => {
 
           {/* Results count */}
           <div className="mt-4 flex items-center justify-between">
-            <p className="text-sm text-text-secondary">
+            <p className="text-text-secondary text-sm">
               عرض {paginatedJobs.length} من {filteredJobs.length} وظيفة
             </p>
-            {(categoryFilter !== 'all' || locationFilter !== 'all' || typeFilter !== 'all' || experienceFilter !== 'all' || searchTerm) && (
+            {(categoryFilter !== 'all' ||
+              locationFilter !== 'all' ||
+              typeFilter !== 'all' ||
+              experienceFilter !== 'all' ||
+              searchTerm) && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -184,12 +240,12 @@ const CareersPage: React.FC = () => {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center py-20"
+              className="py-20 text-center"
             >
-              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-neutral-100 flex items-center justify-center">
-                <Briefcase className="w-12 h-12 text-text-muted" />
+              <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-neutral-100">
+                <Briefcase className="text-text-muted h-12 w-12" />
               </div>
-              <h3 className="text-xl font-semibold text-text-primary mb-2">
+              <h3 className="text-text-primary mb-2 text-xl font-semibold">
                 لا توجد وظائف مطابقة
               </h3>
               <p className="text-text-secondary mb-6">
@@ -213,47 +269,52 @@ const CareersPage: React.FC = () => {
               variants={staggerContainer}
               initial="initial"
               animate="animate"
-              className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+              className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
             >
               {paginatedJobs.map((job) => (
                 <motion.div key={job.id} variants={fadeAnimations.fadeInUp}>
                   <Card hoverable className="h-full">
                     <div className="p-6">
-                      <div className="flex items-start justify-between mb-3">
+                      <div className="mb-3 flex items-start justify-between">
                         <Badge variant="primary" size="sm">
                           {CATEGORY_LABELS[job.category]?.ar || job.category}
                         </Badge>
-                        <span className="text-xs text-text-muted">
-                          {new Date(job.postedDate).toLocaleDateString('ar-EG', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                          })}
+                        <span className="text-text-muted text-xs">
+                          {new Date(job.postedDate).toLocaleDateString(
+                            'ar-EG',
+                            {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                            }
+                          )}
                         </span>
                       </div>
 
-                      <h3 className="text-lg font-semibold text-text-primary mb-3">
+                      <h3 className="text-text-primary mb-3 text-lg font-semibold">
                         {job.title.ar}
                       </h3>
 
-                      <div className="space-y-2 mb-4">
-                        <div className="flex items-center gap-2 text-sm text-text-secondary">
-                          <MapPin className="w-4 h-4" />
+                      <div className="mb-4 space-y-2">
+                        <div className="text-text-secondary flex items-center gap-2 text-sm">
+                          <MapPin className="h-4 w-4" />
                           {job.location.city}, {job.location.governorate}
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-text-secondary">
-                          <Briefcase className="w-4 h-4" />
-                          {EXPERIENCE_LABELS[job.experienceLevel]?.ar || job.experienceLevel}
+                        <div className="text-text-secondary flex items-center gap-2 text-sm">
+                          <Briefcase className="h-4 w-4" />
+                          {EXPERIENCE_LABELS[job.experienceLevel]?.ar ||
+                            job.experienceLevel}
                         </div>
                         {job.salaryRange && (
-                          <div className="flex items-center gap-2 text-sm text-text-secondary">
-                            <DollarSign className="w-4 h-4" />
-                            {job.salaryRange.min.toLocaleString()} - {job.salaryRange.max.toLocaleString()} ج.م/شهر
+                          <div className="text-text-secondary flex items-center gap-2 text-sm">
+                            <DollarSign className="h-4 w-4" />
+                            {job.salaryRange.min.toLocaleString()} -{' '}
+                            {job.salaryRange.max.toLocaleString()} ج.م/شهر
                           </div>
                         )}
                       </div>
 
-                      <div className="flex flex-wrap gap-2 mb-4">
+                      <div className="mb-4 flex flex-wrap gap-2">
                         <Badge variant="neutral" size="sm">
                           {JOB_TYPE_LABELS[job.type]?.ar || job.type}
                         </Badge>
@@ -263,9 +324,7 @@ const CareersPage: React.FC = () => {
                       </div>
 
                       <Button fullWidth asChild>
-                        <Link to={`/jobs/${job.id}`}>
-                          تفاصيل الوظيفة
-                        </Link>
+                        <Link to={`/jobs/${job.id}`}>تفاصيل الوظيفة</Link>
                       </Button>
                     </div>
                   </Card>
@@ -279,7 +338,7 @@ const CareersPage: React.FC = () => {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="flex justify-center items-center gap-2 mt-12"
+              className="mt-12 flex items-center justify-center gap-2"
             >
               <Button
                 variant="outline"
@@ -289,7 +348,7 @@ const CareersPage: React.FC = () => {
               >
                 السابق
               </Button>
-              
+
               {[...Array(totalPages)].map((_, index) => (
                 <Button
                   key={index}
@@ -300,7 +359,7 @@ const CareersPage: React.FC = () => {
                   {index + 1}
                 </Button>
               ))}
-              
+
               <Button
                 variant="outline"
                 size="sm"

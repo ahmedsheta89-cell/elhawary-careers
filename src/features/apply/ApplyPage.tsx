@@ -1,368 +1,506 @@
-/**
- * Apply Page Component
- * Multi-step application form with validation UI
- */
-
-import React, { useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import { CheckCircle, FileText, Mail, Phone, User } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import { Card } from '@/app/components/ui/card';
-import { Input, Textarea } from '@/app/components/ui/input';
 import { FileUpload } from '@/app/components/ui/file-upload';
-import { MOCK_JOBS } from '@/services/mockData';
-import { CheckCircle, Upload, User, Mail, Phone, FileText } from 'lucide-react';
+import { Input, Textarea } from '@/app/components/ui/input';
+import { useJob } from '@/hooks/useJobs';
+import {
+  applicationsService,
+  type CreateApplicationInput,
+} from '@/services/applicationsService';
 
-const ApplyPage: React.FC = () => {
+type FormState = Omit<
+  CreateApplicationInput,
+  'jobId' | 'cvFile' | 'certificateFile' | 'recommendationFile'
+>;
+
+const initialForm: FormState = {
+  fullName: '',
+  birthDate: '',
+  email: '',
+  phone: '',
+  address: '',
+  bio: '',
+  education: {
+    degree: '',
+    institution: '',
+    graduationYear: new Date().getFullYear(),
+    grade: '',
+  },
+  experience: {
+    company: '',
+    position: '',
+    startDate: '',
+    endDate: '',
+    description: '',
+  },
+};
+
+const steps = [
+  { number: 1, title: 'المعلومات الشخصية' },
+  { number: 2, title: 'المؤهلات العلمية' },
+  { number: 3, title: 'الخبرات العملية' },
+  { number: 4, title: 'المستندات' },
+];
+
+export function ApplyPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { job, isLoading } = useJob(id);
   const [currentStep, setCurrentStep] = useState(1);
+  const [form, setForm] = useState<FormState>(initialForm);
+  const [cvFile, setCvFile] = useState<File | null>(null);
+  const [certificateFile, setCertificateFile] = useState<File | null>(null);
+  const [recommendationFile, setRecommendationFile] = useState<File | null>(
+    null
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const job = MOCK_JOBS.find(j => j.id === id);
-
-  const totalSteps = 4;
-
-  const steps = [
-    { number: 1, title: 'المعلومات الشخصية' },
-    { number: 2, title: 'المؤهلات العلمية' },
-    { number: 3, title: 'الخبرات العملية' },
-    { number: 4, title: 'المستندات' },
-  ];
-
-  const handleNext = () => {
-    if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1);
-    }
+  const updateField = <K extends keyof FormState>(
+    field: K,
+    value: FormState[K]
+  ) => {
+    setForm((current) => ({ ...current, [field]: value }));
   };
 
-  const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+  const validateStep = () => {
+    if (
+      currentStep === 1 &&
+      (!form.fullName ||
+        !form.birthDate ||
+        !form.email ||
+        !form.phone ||
+        !form.address)
+    ) {
+      return 'يرجى إكمال جميع البيانات الشخصية المطلوبة.';
     }
+    if (
+      currentStep === 2 &&
+      (!form.education.degree ||
+        !form.education.institution ||
+        !form.education.graduationYear)
+    ) {
+      return 'يرجى إكمال بيانات المؤهل العلمي.';
+    }
+    if (
+      currentStep === 3 &&
+      (!form.experience.company ||
+        !form.experience.position ||
+        !form.experience.startDate)
+    ) {
+      return 'يرجى إكمال بيانات الخبرة العملية.';
+    }
+    if (currentStep === 4 && !cvFile) {
+      return 'السيرة الذاتية مطلوبة لإرسال الطلب.';
+    }
+    return null;
+  };
+
+  const handleNext = () => {
+    const validationError = validateStep();
+    setError(validationError);
+    if (!validationError && currentStep < steps.length)
+      setCurrentStep((step) => step + 1);
   };
 
   const handleSubmit = async () => {
+    const validationError = validateStep();
+    if (validationError || !id || !cvFile) {
+      setError(validationError || 'بيانات التقديم غير مكتملة.');
+      return;
+    }
+
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsSubmitting(false);
-    navigate(`/success/${id}`);
+    setError(null);
+    try {
+      const result = await applicationsService.createApplication({
+        ...form,
+        jobId: id,
+        cvFile,
+        certificateFile: certificateFile ?? undefined,
+        recommendationFile: recommendationFile ?? undefined,
+      });
+      navigate(`/success/${id}?ref=${encodeURIComponent(result.reference)}`);
+    } catch (submitError) {
+      console.error(submitError);
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : 'تعذر إرسال الطلب. حاول مرة أخرى.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div
+        className="bg-background-alternate flex min-h-screen items-center justify-center"
+        dir="rtl"
+      >
+        <p className="text-text-secondary">جاري تحميل الوظيفة...</p>
+      </div>
+    );
+  }
 
   if (!job) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background-alternate" dir="rtl">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-text-primary mb-4">الوظيفة غير موجودة</h1>
-          <Button onClick={() => navigate('/careers')}>العودة للوظائف</Button>
-        </div>
+      <div
+        className="bg-background-alternate flex min-h-screen flex-col items-center justify-center gap-4"
+        dir="rtl"
+      >
+        <p className="text-text-primary">الوظيفة غير موجودة</p>
+        <Button onClick={() => navigate('/careers')}>العودة للوظائف</Button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background-alternate py-12" dir="rtl">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
+    <div className="bg-background-alternate min-h-screen py-12" dir="rtl">
+      <div className="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-8">
           <Link
             to={`/jobs/${id}`}
-            className="inline-flex items-center gap-2 text-text-secondary hover:text-text-primary mb-4 transition-colors"
+            className="text-text-secondary hover:text-text-primary mb-4 inline-flex items-center gap-2"
           >
-            <svg className="w-5 h-5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
             العودة للتفاصيل
           </Link>
-          
-          <h1 className="text-3xl font-bold text-text-primary mb-2">التقدم للوظيفة</h1>
+          <h1 className="text-text-primary mb-2 text-3xl font-bold">
+            التقدم للوظيفة
+          </h1>
           <p className="text-text-secondary">{job.title.ar}</p>
-        </motion.div>
+        </div>
 
-        {/* Progress Steps */}
         <Card className="mb-8">
           <div className="p-6">
             <div className="flex items-center justify-between">
               {steps.map((step, index) => (
-                <React.Fragment key={step.number}>
-                  <div className="flex flex-col items-center flex-1">
+                <div key={step.number} className="flex flex-1 items-center">
+                  <div className="flex flex-col items-center">
                     <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all duration-300 ${
-                        currentStep >= step.number
-                          ? 'bg-primary-600 text-white'
-                          : 'bg-neutral-200 text-text-muted'
-                      }`}
+                      className={`flex h-10 w-10 items-center justify-center rounded-full font-semibold ${currentStep >= step.number ? 'bg-primary-600 text-white' : 'text-text-muted bg-neutral-200'}`}
                     >
                       {currentStep > step.number ? (
-                        <CheckCircle className="w-6 h-6" />
+                        <CheckCircle className="h-6 w-6" />
                       ) : (
                         step.number
                       )}
                     </div>
-                    <span
-                      className={`text-xs mt-2 hidden sm:block ${
-                        currentStep >= step.number ? 'text-text-primary' : 'text-text-muted'
-                      }`}
-                    >
+                    <span className="text-text-secondary mt-2 hidden text-xs sm:block">
                       {step.title}
                     </span>
                   </div>
                   {index < steps.length - 1 && (
                     <div
-                      className={`flex-1 h-1 mx-2 rounded ${
-                        currentStep > index + 1 ? 'bg-primary-600' : 'bg-neutral-200'
-                      }`}
+                      className={`mx-2 h-1 flex-1 rounded ${currentStep > index + 1 ? 'bg-primary-600' : 'bg-neutral-200'}`}
                     />
                   )}
-                </React.Fragment>
+                </div>
               ))}
             </div>
           </div>
         </Card>
 
-        {/* Form Card */}
         <Card>
           <div className="p-8">
             <AnimatePresence mode="wait">
-              {/* Step 1: Personal Information */}
               {currentStep === 1 && (
                 <motion.div
-                  key="step1"
+                  key="personal"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-6"
                 >
-                  <h2 className="text-xl font-semibold text-text-primary mb-6">المعلومات الشخصية</h2>
-                  
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <h2 className="text-text-primary text-xl font-semibold">
+                    المعلومات الشخصية
+                  </h2>
+                  <div className="grid gap-6 md:grid-cols-2">
                     <Input
                       label="الاسم الكامل"
+                      value={form.fullName}
+                      onChange={(event) =>
+                        updateField('fullName', event.target.value)
+                      }
                       placeholder="أحمد محمد علي"
                       required
-                      leftIcon={<User className="w-5 h-5" />}
+                      leftIcon={<User className="h-5 w-5" />}
                     />
                     <Input
                       label="تاريخ الميلاد"
                       type="date"
+                      value={form.birthDate}
+                      onChange={(event) =>
+                        updateField('birthDate', event.target.value)
+                      }
                       required
                     />
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-6">
                     <Input
                       label="البريد الإلكتروني"
                       type="email"
+                      value={form.email}
+                      onChange={(event) =>
+                        updateField('email', event.target.value)
+                      }
                       placeholder="example@email.com"
                       required
-                      leftIcon={<Mail className="w-5 h-5" />}
+                      leftIcon={<Mail className="h-5 w-5" />}
                     />
                     <Input
                       label="رقم الهاتف"
                       type="tel"
+                      value={form.phone}
+                      onChange={(event) =>
+                        updateField('phone', event.target.value)
+                      }
                       placeholder="+20 1XX XXX XXXX"
                       required
-                      leftIcon={<Phone className="w-5 h-5" />}
+                      leftIcon={<Phone className="h-5 w-5" />}
                     />
                   </div>
-
                   <Input
                     label="العنوان"
+                    value={form.address}
+                    onChange={(event) =>
+                      updateField('address', event.target.value)
+                    }
                     placeholder="المدينة، المحافظة"
                     required
                   />
-
                   <Textarea
                     label="نبذة عنك"
+                    value={form.bio}
+                    onChange={(event) => updateField('bio', event.target.value)}
                     placeholder="اكتب نبذة مختصرة عن نفسك..."
                     rows={4}
                   />
                 </motion.div>
               )}
 
-              {/* Step 2: Education */}
               {currentStep === 2 && (
                 <motion.div
-                  key="step2"
+                  key="education"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-6"
                 >
-                  <h2 className="text-xl font-semibold text-text-primary mb-6">المؤهلات العلمية</h2>
-                  
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <h2 className="text-text-primary text-xl font-semibold">
+                    المؤهلات العلمية
+                  </h2>
+                  <div className="grid gap-6 md:grid-cols-2">
                     <Input
                       label="المؤهل الدراسي"
+                      value={form.education.degree}
+                      onChange={(event) =>
+                        updateField('education', {
+                          ...form.education,
+                          degree: event.target.value,
+                        })
+                      }
                       placeholder="بكالوريوس الصيدلة"
                       required
                     />
                     <Input
                       label="الجامعة/المعهد"
+                      value={form.education.institution}
+                      onChange={(event) =>
+                        updateField('education', {
+                          ...form.education,
+                          institution: event.target.value,
+                        })
+                      }
                       placeholder="جامعة القاهرة"
                       required
                     />
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-6">
                     <Input
                       label="سنة التخرج"
                       type="number"
-                      placeholder="2023"
+                      value={form.education.graduationYear}
+                      onChange={(event) =>
+                        updateField('education', {
+                          ...form.education,
+                          graduationYear: Number(event.target.value),
+                        })
+                      }
                       required
                     />
                     <Input
                       label="التقدير العام"
+                      value={form.education.grade}
+                      onChange={(event) =>
+                        updateField('education', {
+                          ...form.education,
+                          grade: event.target.value,
+                        })
+                      }
                       placeholder="جيد جداً"
                     />
-                  </div>
-
-                  <div className="border-t pt-6">
-                    <Button variant="outline" fullWidth>
-                      <Upload className="w-4 h-4 ml-2" />
-                      إضافة مؤهل آخر
-                    </Button>
                   </div>
                 </motion.div>
               )}
 
-              {/* Step 3: Experience */}
               {currentStep === 3 && (
                 <motion.div
-                  key="step3"
+                  key="experience"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-6"
                 >
-                  <h2 className="text-xl font-semibold text-text-primary mb-6">الخبرات العملية</h2>
-                  
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <h2 className="text-text-primary text-xl font-semibold">
+                    الخبرات العملية
+                  </h2>
+                  <div className="grid gap-6 md:grid-cols-2">
                     <Input
                       label="اسم الشركة"
+                      value={form.experience.company}
+                      onChange={(event) =>
+                        updateField('experience', {
+                          ...form.experience,
+                          company: event.target.value,
+                        })
+                      }
                       placeholder="صيدلية ..."
                       required
                     />
                     <Input
                       label="المسمى الوظيفي"
+                      value={form.experience.position}
+                      onChange={(event) =>
+                        updateField('experience', {
+                          ...form.experience,
+                          position: event.target.value,
+                        })
+                      }
                       placeholder="صيدلي"
                       required
                     />
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-6">
                     <Input
                       label="تاريخ البدء"
                       type="date"
+                      value={form.experience.startDate}
+                      onChange={(event) =>
+                        updateField('experience', {
+                          ...form.experience,
+                          startDate: event.target.value,
+                        })
+                      }
                       required
                     />
                     <Input
                       label="تاريخ الانتهاء"
                       type="date"
+                      value={form.experience.endDate}
+                      onChange={(event) =>
+                        updateField('experience', {
+                          ...form.experience,
+                          endDate: event.target.value,
+                        })
+                      }
                       hint="اتركه فارغاً إذا كنت تعمل حالياً"
                     />
                   </div>
-
                   <Textarea
                     label="وصف المهام"
-                    placeholder="اكتب وصفًا مختصرًا لمهامك ومسؤولياتك..."
+                    value={form.experience.description}
+                    onChange={(event) =>
+                      updateField('experience', {
+                        ...form.experience,
+                        description: event.target.value,
+                      })
+                    }
+                    placeholder="اكتب وصفاً مختصراً لمهامك ومسؤولياتك..."
                     rows={4}
                   />
-
-                  <div className="border-t pt-6">
-                    <Button variant="outline" fullWidth>
-                      <Upload className="w-4 h-4 ml-2" />
-                      إضافة خبرة أخرى
-                    </Button>
-                  </div>
                 </motion.div>
               )}
 
-              {/* Step 4: Documents */}
               {currentStep === 4 && (
                 <motion.div
-                  key="step4"
+                  key="documents"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-6"
                 >
-                  <h2 className="text-xl font-semibold text-text-primary mb-6">المستندات</h2>
-                  
+                  <h2 className="text-text-primary text-xl font-semibold">
+                    المستندات
+                  </h2>
                   <FileUpload
                     label="السيرة الذاتية (CV)"
                     accept=".pdf,.doc,.docx"
                     maxSize={5 * 1024 * 1024}
-                    hint="الملفات المسموحة: PDF, DOC, DOCX (الحد الأقصى 5MB)"
+                    hint="PDF, DOC, DOCX — الحد الأقصى 5MB"
                     required
-                    leftIcon={<FileText className="w-5 h-5" />}
+                    leftIcon={<FileText className="h-5 w-5" />}
+                    onFileSelect={(files) => setCvFile(files?.[0] ?? null)}
                   />
-
                   <FileUpload
                     label="صورة المؤهل الدراسي"
                     accept="image/*"
                     maxSize={2 * 1024 * 1024}
-                    hint="الملفات المسموحة: JPG, PNG (الحد الأقصى 2MB)"
-                    required
+                    hint="JPG, PNG — الحد الأقصى 2MB"
+                    onFileSelect={(files) =>
+                      setCertificateFile(files?.[0] ?? null)
+                    }
                   />
-
                   <FileUpload
                     label="خطاب التوصية (اختياري)"
                     accept=".pdf,.doc,.docx"
                     maxSize={5 * 1024 * 1024}
-                    hint="الملفات المسموحة: PDF, DOC, DOCX (الحد الأقصى 5MB)"
+                    hint="PDF, DOC, DOCX — الحد الأقصى 5MB"
+                    onFileSelect={(files) =>
+                      setRecommendationFile(files?.[0] ?? null)
+                    }
                   />
-
-                  <div className="bg-warning-50 border border-warning-200 rounded-lg p-4">
-                    <p className="text-sm text-warning-700">
-                      ⚠️ تأكد من صحة جميع المعلومات قبل الإرسال. أي معلومات خاطئة قد تؤدي إلى رفض طلبك.
-                    </p>
+                  <div className="border-warning-200 rounded-lg border bg-warning-50 p-4 text-sm text-warning-700">
+                    تأكد من صحة جميع المعلومات قبل الإرسال. سيتم استخدام بياناتك
+                    لغرض التوظيف فقط.
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            {/* Navigation Buttons */}
-            <div className="flex gap-4 mt-8 pt-6 border-t">
+            {error && (
+              <p
+                className="mt-6 rounded-lg bg-danger-50 p-3 text-sm text-danger-700"
+                role="alert"
+              >
+                {error}
+              </p>
+            )}
+            <div className="mt-8 flex gap-4 border-t pt-6">
               {currentStep > 1 && (
                 <Button
                   variant="outline"
                   fullWidth
-                  onClick={handleBack}
-                  className="flex-1"
+                  onClick={() => {
+                    setError(null);
+                    setCurrentStep((step) => step - 1);
+                  }}
                 >
                   السابق
                 </Button>
               )}
-              
-              {currentStep < totalSteps ? (
-                <Button
-                  fullWidth
-                  onClick={handleNext}
-                  className="flex-1"
-                >
+              {currentStep < steps.length ? (
+                <Button fullWidth onClick={handleNext}>
                   التالي
-                  <svg className="w-5 h-5 mr-2 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
                 </Button>
               ) : (
                 <Button
                   fullWidth
                   size="lg"
-                  onClick={handleSubmit}
+                  onClick={() => void handleSubmit()}
                   loading={isSubmitting}
-                  className="flex-1 bg-success-600 hover:bg-success-700"
                 >
                   {isSubmitting ? 'جاري الإرسال...' : 'إرسال الطلب'}
-                  {!isSubmitting && (
-                    <CheckCircle className="w-5 h-5 mr-2" />
-                  )}
+                  {!isSubmitting && <CheckCircle className="h-5 w-5" />}
                 </Button>
               )}
             </div>
@@ -371,6 +509,4 @@ const ApplyPage: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export { ApplyPage };
+}

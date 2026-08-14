@@ -43,31 +43,31 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <label
             htmlFor={id}
             className={cn(
-              'block text-sm font-medium text-text-primary mb-2',
+              'text-text-primary mb-2 block text-sm font-medium',
               error && 'text-danger-500'
             )}
           >
             {label}
-            {required && <span className="text-danger-500 ml-1">*</span>}
+            {required && <span className="ml-1 text-danger-500">*</span>}
           </label>
         )}
-        
+
         <div className="relative">
           {leftIcon && (
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-text-muted">
+            <div className="text-text-muted pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
               {leftIcon}
             </div>
           )}
-          
+
           <input
             id={id}
             type={type}
             ref={ref}
             className={cn(
-              'flex h-11 w-full rounded-lg border border-border-default bg-white px-4 py-2 text-base text-text-primary',
+              'border-border-default text-text-primary flex h-11 w-full rounded-lg border bg-white px-4 py-2 text-base',
               'placeholder:text-text-muted/70',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:border-transparent',
-              'disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-neutral-50',
+              'focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500',
+              'disabled:cursor-not-allowed disabled:bg-neutral-50 disabled:opacity-50',
               'transition-all duration-200',
               error && 'border-danger-500 focus-visible:ring-danger-500',
               leftIcon && 'pl-10',
@@ -79,32 +79,33 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             disabled={disabled}
             {...props}
           />
-          
+
           {rightIcon && (
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-text-muted">
+            <div className="text-text-muted pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
               {rightIcon}
             </div>
           )}
         </div>
-        
+
         {error && (
           <p
             id={errorId}
-            className="mt-2 text-sm text-danger-500 flex items-center gap-1"
+            className="mt-2 flex items-center gap-1 text-sm text-danger-500"
             role="alert"
           >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
             </svg>
             {error}
           </p>
         )}
-        
+
         {!error && hint && (
-          <p
-            id={hintId}
-            className="mt-2 text-sm text-text-muted"
-          >
+          <p id={hintId} className="text-text-muted mt-2 text-sm">
             {hint}
           </p>
         )}
@@ -148,24 +149,24 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           <label
             htmlFor={id}
             className={cn(
-              'block text-sm font-medium text-text-primary mb-2',
+              'text-text-primary mb-2 block text-sm font-medium',
               error && 'text-danger-500'
             )}
           >
             {label}
-            {required && <span className="text-danger-500 ml-1">*</span>}
+            {required && <span className="ml-1 text-danger-500">*</span>}
           </label>
         )}
-        
+
         <textarea
           id={id}
           ref={ref}
           className={cn(
-            'flex min-h-[120px] w-full rounded-lg border border-border-default bg-white px-4 py-3 text-base text-text-primary',
+            'border-border-default text-text-primary flex min-h-[120px] w-full rounded-lg border bg-white px-4 py-3 text-base',
             'placeholder:text-text-muted/70',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:border-transparent',
-            'disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-neutral-50',
-            'transition-all duration-200 resize-y',
+            'focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500',
+            'disabled:cursor-not-allowed disabled:bg-neutral-50 disabled:opacity-50',
+            'resize-y transition-all duration-200',
             error && 'border-danger-500 focus-visible:ring-danger-500',
             className
           )}
@@ -174,25 +175,26 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           disabled={disabled}
           {...props}
         />
-        
+
         {error && (
           <p
             id={errorId}
-            className="mt-2 text-sm text-danger-500 flex items-center gap-1"
+            className="mt-2 flex items-center gap-1 text-sm text-danger-500"
             role="alert"
           >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
             </svg>
             {error}
           </p>
         )}
-        
+
         {!error && hint && (
-          <p
-            id={hintId}
-            className="mt-2 text-sm text-text-muted"
-          >
+          <p id={hintId} className="text-text-muted mt-2 text-sm">
             {hint}
           </p>
         )}

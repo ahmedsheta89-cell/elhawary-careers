@@ -28,22 +28,22 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
   return (
     <header
       className={cn(
-        'sticky top-0 z-sticky w-full bg-white/80 backdrop-blur-md border-b border-border-default',
+        'border-border-default sticky top-0 z-sticky w-full border-b bg-white/80 backdrop-blur-md',
         className
       )}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 md:h-20">
+        <div className="flex h-16 items-center justify-between md:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 group">
+          <Link to="/" className="group flex items-center gap-3">
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="flex items-center gap-3"
             >
-              <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-gradient-to-br from-primary-600 to-primary-700 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary-600 to-primary-700 shadow-lg transition-shadow group-hover:shadow-xl md:h-12 md:w-12">
                 <svg
-                  className="h-6 w-6 md:h-7 md:w-7 text-white"
+                  className="h-6 w-6 text-white md:h-7 md:w-7"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -57,10 +57,10 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                 </svg>
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-lg md:text-xl font-bold text-text-primary">
+                <h1 className="text-text-primary text-lg font-bold md:text-xl">
                   صيدلية الهواري
                 </h1>
-                <p className="text-xs text-text-muted -mt-1">
+                <p className="text-text-muted -mt-1 text-xs">
                   El Hawary Pharmacy
                 </p>
               </div>
@@ -68,15 +68,15 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden items-center gap-1 md:flex">
             {NAVIGATION_ITEMS.map((item) => (
               <Link
                 key={item.key}
                 to={item.path}
                 className={cn(
-                  'px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200',
+                  'rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200',
                   isActive(item.path)
-                    ? 'text-primary-600 bg-primary-50'
+                    ? 'bg-primary-50 text-primary-600'
                     : 'text-text-secondary hover:text-text-primary hover:bg-neutral-100'
                 )}
               >
@@ -86,14 +86,14 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
           </nav>
 
           {/* CTA Button - Desktop */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden items-center gap-4 md:flex">
             <Button variant="outline" size="sm">
               تسجيل الدخول
             </Button>
             <Button size="sm">
               قدم الآن
               <svg
-                className="w-4 h-4 mr-1"
+                className="mr-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -111,7 +111,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-neutral-100 transition-colors"
+            className="text-text-secondary hover:text-text-primary rounded-lg p-2 transition-colors hover:bg-neutral-100 md:hidden"
             aria-label="Toggle menu"
           >
             <AnimatePresence mode="wait">
@@ -164,31 +164,29 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="md:hidden overflow-hidden border-t border-border-default"
+              className="border-border-default overflow-hidden border-t md:hidden"
             >
-              <nav className="py-4 space-y-2">
+              <nav className="space-y-2 py-4">
                 {NAVIGATION_ITEMS.map((item) => (
                   <Link
                     key={item.key}
                     to={item.path}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={cn(
-                      'block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200',
+                      'block rounded-lg px-4 py-3 text-base font-medium transition-all duration-200',
                       isActive(item.path)
-                        ? 'text-primary-600 bg-primary-50'
+                        ? 'bg-primary-50 text-primary-600'
                         : 'text-text-secondary hover:text-text-primary hover:bg-neutral-100'
                     )}
                   >
                     {item.labelAr}
                   </Link>
                 ))}
-                <div className="pt-4 mt-4 border-t border-border-default space-y-3">
+                <div className="border-border-default mt-4 space-y-3 border-t pt-4">
                   <Button variant="outline" fullWidth>
                     تسجيل الدخول
                   </Button>
-                  <Button fullWidth>
-                    قدم الآن
-                  </Button>
+                  <Button fullWidth>قدم الآن</Button>
                 </div>
               </nav>
             </motion.div>

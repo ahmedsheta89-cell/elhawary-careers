@@ -1,32 +1,68 @@
-# React + TypeScript + Vite
+# El Hawary Careers
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+منصة التوظيف الرسمية لصيدلية الهواري، مبنية باستخدام React وTypeScript وVite وTailwind CSS، ومهيأة للربط مع Firebase لإدارة الوظائف وطلبات التوظيف.
 
-Currently, two official plugins are available:
+## ما تم إنجازه
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+تتضمن النسخة الحالية صفحة رئيسية عربية متجاوبة، صفحات الوظائف والتفاصيل والتقديم، نموذج تقديم متعدد الخطوات، رفع السيرة الذاتية والمرفقات إلى Firebase Storage، حفظ الطلبات في Firestore، صفحة نجاح تحتوي على رقم مرجعي، وصفحة اتصال، بالإضافة إلى لوحة إدارة داخلية على المسار `/admin`.
 
-## React Compiler
+عند عدم إعداد Firebase، تستخدم الواجهة بيانات تجريبية حتى يمكن تشغيل التصميم محلياً. أما الإطلاق الفعلي فيتطلب إعداد Firebase وتعبئة متغيرات البيئة.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## التشغيل المحلي
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm ci
+cp .env.example .env
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+للفحص قبل النشر:
+
+```bash
+npm run lint
+npm run build
+```
+
+## إعداد Firebase
+
+أنشئ Web App داخل مشروع Firebase، فعّل Authentication باستخدام Email/Password، وأنشئ Firestore Database وStorage. بعد ذلك املأ القيم التالية داخل `.env`:
+
+```env
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+VITE_FIREBASE_MEASUREMENT_ID=
+```
+
+طبّق قواعد الحماية الموجودة في `firestore.rules` و`storage.rules` باستخدام Firebase CLI. السير الذاتية لا تُعرّض بروابط عامة؛ القراءة محصورة بحساب يحمل custom claim باسم `admin=true`.
+
+## لوحة الإدارة
+
+افتح `/admin` وسجّل الدخول بحساب Firebase مخصص للإدارة. يجب أن يحمل الحساب custom claim باسم `admin=true` حتى يستطيع قراءة الطلبات وتحديث حالتها. يفضّل إنشاء حساب إدارة منفصل وعدم مشاركة بياناته مع فريق التقديم.
+
+الحالات المتاحة للطلب هي: جديد، قيد المراجعة، قائمة مختصرة، مرفوض، وتم التعيين.
+
+## بنية البيانات
+
+تُحفظ الوظائف في مجموعة `jobs`، بينما تُحفظ الطلبات في مجموعة `applications`. المرفقات تحفظ داخل Storage بالمسار:
+
+```text
+applications/{jobId}/{uuid}-{kind}-{safeFileName}
+```
+
+الخدمة الحالية تحفظ مسار الملف وبياناته داخل الطلب بدلاً من إنشاء رابط عام. يمكن إضافة وظيفة تنزيل موقعة داخل لوحة الإدارة في المرحلة التالية.
+
+## النشر
+
+بعد إدخال متغيرات البيئة، نفّذ `npm run build` ثم انشر مجلد `dist` على Vercel أو Netlify أو Firebase Hosting. قبل الإعلان عن الموقع يجب اختبار إرسال طلب حقيقي في بيئة الإنتاج، والتأكد من وصوله إلى Firestore، وظهور المرفق لحساب المدير، وصحة البريد والهاتف وواتساب.
+
+## ملاحظات ما قبل الإطلاق
+
+يجب استبدال بيانات الوظائف التجريبية بمحتوى حقيقي، وتأكيد البريد والهاتف والعنوان، إضافة سياسة الخصوصية والموافقة على معالجة البيانات، تحديد مدة الاحتفاظ بالسير الذاتية، وإضافة حماية من الإرسال الآلي ومعدل الطلبات إذا أصبح النموذج عاماً على نطاق واسع.
+
+## خارطة التطوير التالية
+
+الخطوات ذات الأولوية بعد هذه النسخة هي إضافة إنشاء وتعديل وإغلاق الوظائف من لوحة الإدارة، تنزيل المرفقات بصلاحيات المدير، إرسال رسائل بريدية تلقائية عند التقديم وتغيير الحالة، إضافة تحليلات ومراقبة أخطاء، ثم توفير API منظم إذا أُريد ربط الموقع بتطبيق جوال مستقبلاً.

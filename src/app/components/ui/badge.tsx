@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components */
+
 /**
  * Badge Component
  * Reusable badge/label component with multiple variants
@@ -35,7 +37,8 @@ const badgeVariants = cva(
 );
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLSpanElement>,
+  extends
+    React.HTMLAttributes<HTMLSpanElement>,
     VariantProps<typeof badgeVariants> {
   icon?: React.ReactNode;
 }

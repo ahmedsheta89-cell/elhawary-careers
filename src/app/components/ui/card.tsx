@@ -7,7 +7,8 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { motion, HTMLMotionProps } from 'framer-motion';
 
-export interface CardProps extends HTMLMotionProps<'div'> {
+export interface CardProps extends Omit<HTMLMotionProps<'div'>, 'children'> {
+  children?: React.ReactNode;
   title?: string;
   description?: string;
   header?: React.ReactNode;
@@ -42,8 +43,9 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       <motion.div
         ref={ref}
         className={cn(
-          'bg-white rounded-xl border border-border-default shadow-sm overflow-hidden',
-          hoverable && 'transition-all duration-300 hover:shadow-lg hover:-translate-y-1',
+          'border-border-default overflow-hidden rounded-xl border bg-white shadow-sm',
+          hoverable &&
+            'transition-all duration-300 hover:-translate-y-1 hover:shadow-lg',
           paddingClasses[padding],
           className
         )}
@@ -52,31 +54,31 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         {...props}
       >
         {header && <div className="mb-4">{header}</div>}
-        
+
         {(title || description) && (
           <div className="mb-4">
             {title && (
-              <h3 className="text-xl font-semibold text-text-primary mb-2">
+              <h3 className="text-text-primary mb-2 text-xl font-semibold">
                 {title}
               </h3>
             )}
             {description && (
-              <p className="text-text-secondary text-sm">
-                {description}
-              </p>
+              <p className="text-text-secondary text-sm">{description}</p>
             )}
           </div>
         )}
-        
-        {children && <div className={cn((title || description) && 'mt-4')}>
-          {children}
-        </div>}
-        
+
+        {children && (
+          <div className={cn((title || description) && 'mt-4')}>{children}</div>
+        )}
+
         {footer && (
-          <div className={cn(
-            'mt-6 pt-6 border-t border-border-default',
-            padding === 'none' && 'border-t-0 pt-0'
-          )}>
+          <div
+            className={cn(
+              'border-border-default mt-6 border-t pt-6',
+              padding === 'none' && 'border-t-0 pt-0'
+            )}
+          >
             {footer}
           </div>
         )}
@@ -88,7 +90,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
 Card.displayName = 'Card';
 
 // Card Header component
-interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string;
   description?: string;
 }
@@ -97,11 +99,11 @@ const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
   ({ className, title, description, children, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('flex flex-col gap-1 mb-4', className)}
+      className={cn('mb-4 flex flex-col gap-1', className)}
       {...props}
     >
       {title && (
-        <h3 className="text-xl font-semibold text-text-primary">{title}</h3>
+        <h3 className="text-text-primary text-xl font-semibold">{title}</h3>
       )}
       {description && (
         <p className="text-text-secondary text-sm">{description}</p>
@@ -114,25 +116,29 @@ const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
 CardHeader.displayName = 'CardHeader';
 
 // Card Content component
-interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {}
+export interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn('text-text-secondary', className)} {...props} />
+    <div
+      ref={ref}
+      className={cn('text-text-secondary', className)}
+      {...props}
+    />
   )
 );
 
 CardContent.displayName = 'CardContent';
 
 // Card Footer component
-interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {}
+export interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
-        'flex items-center gap-4 mt-6 pt-6 border-t border-border-default',
+        'border-border-default mt-6 flex items-center gap-4 border-t pt-6',
         className
       )}
       {...props}

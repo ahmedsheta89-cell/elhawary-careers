@@ -12,7 +12,7 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
-    <div className="min-h-screen flex flex-col bg-background-default" dir="rtl">
+    <div className="bg-background-default flex min-h-screen flex-col" dir="rtl">
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />

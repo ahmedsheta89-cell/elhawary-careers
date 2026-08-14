@@ -4,36 +4,44 @@
  */
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { config } from '@/config';
 import { motion } from 'framer-motion';
 import { Button } from '@/app/components/ui/button';
 import { Card } from '@/app/components/ui/card';
 import { CheckCircle, MessageCircle, Home, Share2 } from 'lucide-react';
 
 const SuccessPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const reference = searchParams.get('ref') || 'سيظهر بعد تأكيد الطلب';
+  const whatsappNumber = config.contact.phone.replace(/[^0-9]/g, '');
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-success-50 to-success-100 flex items-center justify-center py-12" dir="rtl">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-lg">
+    <div
+      className="flex min-h-screen items-center justify-center bg-gradient-to-br from-success-50 to-success-100 py-12"
+      dir="rtl"
+    >
+      <div className="container mx-auto max-w-lg px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5, type: 'spring', stiffness: 200 }}
         >
-          <Card className="text-center overflow-hidden">
+          <Card className="overflow-hidden text-center">
             <div className="p-8 py-12">
               {/* Animated Success Icon */}
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                className="w-24 h-24 mx-auto mb-6 rounded-full bg-success-100 flex items-center justify-center"
+                className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-success-100"
               >
                 <motion.div
                   initial={{ pathLength: 0 }}
                   animate={{ pathLength: 1 }}
                   transition={{ delay: 0.4, duration: 0.5 }}
                 >
-                  <CheckCircle className="w-14 h-14 text-success-600" />
+                  <CheckCircle className="h-14 w-14 text-success-600" />
                 </motion.div>
               </motion.div>
 
@@ -54,9 +62,16 @@ const SuccessPage: React.FC = () => {
                     repeat: Infinity,
                     repeatDelay: 2,
                   }}
-                  className="absolute top-1/2 left-1/2 w-3 h-3 rounded-full"
+                  className="absolute left-1/2 top-1/2 h-3 w-3 rounded-full"
                   style={{
-                    backgroundColor: ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'][i],
+                    backgroundColor: [
+                      '#22c55e',
+                      '#3b82f6',
+                      '#f59e0b',
+                      '#ef4444',
+                      '#8b5cf6',
+                      '#ec4899',
+                    ][i],
                   }}
                 />
               ))}
@@ -66,7 +81,7 @@ const SuccessPage: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-2xl md:text-3xl font-bold text-text-primary mb-4"
+                className="text-text-primary mb-4 text-2xl font-bold md:text-3xl"
               >
                 تم إرسال طلبك بنجاح!
               </motion.h1>
@@ -79,7 +94,8 @@ const SuccessPage: React.FC = () => {
               >
                 نشكرك على اهتمامك بالانضمام إلى فريق صيدلية الهواري.
                 <br />
-                سيقوم فريق الموارد البشرية بمراجعة طلبك والتواصل معك خلال 5 أيام عمل.
+                سيقوم فريق الموارد البشرية بمراجعة طلبك والتواصل معك خلال 5 أيام
+                عمل.
               </motion.p>
 
               {/* Reference Number */}
@@ -87,11 +103,13 @@ const SuccessPage: React.FC = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
-                className="bg-neutral-100 rounded-lg p-4 mb-8"
+                className="mb-8 rounded-lg bg-neutral-100 p-4"
               >
-                <p className="text-sm text-text-muted mb-1">رقم الطلب المرجعي</p>
-                <p className="text-xl font-mono font-bold text-text-primary">
-                  ELP-{Date.now().toString().slice(-8)}
+                <p className="text-text-muted mb-1 text-sm">
+                  رقم الطلب المرجعي
+                </p>
+                <p className="text-text-primary font-mono text-xl font-bold">
+                  {reference}
                 </p>
               </motion.div>
 
@@ -100,15 +118,25 @@ const SuccessPage: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
-                className="text-right bg-info-50 border border-info-200 rounded-lg p-4 mb-8"
+                className="border-info-200 mb-8 rounded-lg border bg-info-50 p-4 text-right"
               >
-                <h3 className="font-semibold text-info-800 mb-2 flex items-center gap-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <h3 className="text-info-800 mb-2 flex items-center gap-2 font-semibold">
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                   الخطوات التالية:
                 </h3>
-                <ul className="text-sm text-info-700 space-y-2 text-right pr-7">
+                <ul className="space-y-2 pr-7 text-right text-sm text-info-700">
                   <li>• راقب بريدك الإلكتروني للتحديثات</li>
                   <li>• تحقق من مجلد البريد العشوائي</li>
                   <li>• احتفظ برقم الطلب المرجعي</li>
@@ -127,11 +155,15 @@ const SuccessPage: React.FC = () => {
                   fullWidth
                   size="lg"
                   variant="success"
-                  className="bg-success-600 hover:bg-success-700 text-white"
+                  className="bg-success-600 text-white hover:bg-success-700"
                   asChild
                 >
-                  <a href="https://wa.me/201000000000" target="_blank" rel="noopener noreferrer">
-                    <MessageCircle className="w-5 h-5 ml-2" />
+                  <a
+                    href={`https://wa.me/${whatsappNumber}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <MessageCircle className="ml-2 h-5 w-5" />
                     تواصل عبر واتساب
                   </a>
                 </Button>
@@ -139,14 +171,14 @@ const SuccessPage: React.FC = () => {
                 <div className="flex gap-3">
                   <Button fullWidth variant="outline" asChild>
                     <Link to="/">
-                      <Home className="w-4 h-4 ml-2" />
+                      <Home className="ml-2 h-4 w-4" />
                       الرئيسية
                     </Link>
                   </Button>
 
                   <Button fullWidth variant="outline" asChild>
                     <Link to="/careers">
-                      <Share2 className="w-4 h-4 ml-2" />
+                      <Share2 className="ml-2 h-4 w-4" />
                       وظائف أخرى
                     </Link>
                   </Button>
@@ -158,9 +190,9 @@ const SuccessPage: React.FC = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.8 }}
-                className="mt-8 text-xs text-text-muted"
+                className="text-text-muted mt-8 text-xs"
               >
-                للاستفسارات: careers@elhawary.com | 01000000000
+                للاستفسارات: {config.contact.email} | {config.contact.phone}
               </motion.p>
             </div>
           </Card>
