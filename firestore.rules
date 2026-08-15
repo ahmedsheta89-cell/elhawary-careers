@@ -32,6 +32,11 @@ service cloud.firestore {
         'address', 'bio', 'education', 'experience', 'privacyConsent',
         'dedupeKey', 'cvDelivery', 'cvReceived', 'status', 'submittedAt', 'updatedAt'
       ])
+      && request.resource.data.keys().hasAll([
+        'jobId', 'fullName', 'birthDate', 'email', 'phone', 'whatsappNumber',
+        'address', 'education', 'experience', 'privacyConsent', 'dedupeKey',
+        'cvDelivery', 'cvReceived', 'status', 'submittedAt', 'updatedAt'
+      ])
       && request.resource.data.status == 'pending'
       && request.resource.data.privacyConsent == true
       && request.resource.data.jobId is string
@@ -43,12 +48,41 @@ service cloud.firestore {
       && get(/databases/$(database)/documents/jobs/$(request.resource.data.jobId)).data.isActive == true
       && request.resource.data.fullName is string
       && request.resource.data.fullName.size() >= 2
+      && request.resource.data.fullName.size() <= 120
+      && request.resource.data.birthDate is string
+      && request.resource.data.birthDate.size() >= 4
+      && request.resource.data.birthDate.size() <= 20
       && request.resource.data.email is string
       && request.resource.data.email.size() <= 254
       && request.resource.data.phone is string
       && request.resource.data.phone.size() >= 8
+      && request.resource.data.phone.size() <= 30
       && request.resource.data.whatsappNumber is string
       && request.resource.data.whatsappNumber.size() >= 8
+      && request.resource.data.whatsappNumber.size() <= 30
+      && request.resource.data.address is string
+      && request.resource.data.address.size() >= 2
+      && request.resource.data.address.size() <= 300
+      && request.resource.data.education is map
+      && request.resource.data.education.keys().hasAll(['degree', 'institution', 'graduationYear'])
+      && request.resource.data.education.degree is string
+      && request.resource.data.education.degree.size() >= 2
+      && request.resource.data.education.degree.size() <= 160
+      && request.resource.data.education.institution is string
+      && request.resource.data.education.institution.size() >= 2
+      && request.resource.data.education.institution.size() <= 200
+      && request.resource.data.education.graduationYear is number
+      && request.resource.data.experience is map
+      && request.resource.data.experience.keys().hasAll(['company', 'position', 'startDate'])
+      && request.resource.data.experience.company is string
+      && request.resource.data.experience.company.size() >= 2
+      && request.resource.data.experience.company.size() <= 160
+      && request.resource.data.experience.position is string
+      && request.resource.data.experience.position.size() >= 2
+      && request.resource.data.experience.position.size() <= 160
+      && request.resource.data.experience.startDate is string
+      && request.resource.data.experience.startDate.size() >= 1
+      && request.resource.data.privacyConsent == true
       && request.resource.data.cvDelivery == 'whatsapp'
       && request.resource.data.cvReceived == false;
 

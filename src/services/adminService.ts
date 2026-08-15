@@ -1,6 +1,8 @@
 import {
+  browserSessionPersistence,
   onAuthStateChanged,
   sendPasswordResetEmail,
+  setPersistence,
   signInWithEmailAndPassword,
   signOut,
   type User,
@@ -61,6 +63,7 @@ class AdminService {
 
   async signIn(email: string, password: string) {
     const { auth } = requireFirebase();
+    await setPersistence(auth, browserSessionPersistence);
     return signInWithEmailAndPassword(auth, email, password);
   }
 
