@@ -102,7 +102,7 @@
 | نشر `robots.txt` | تم التحقق منه |
 | نشر `sitemap.xml` | تم التحقق منه |
 
-رابط تشغيل GitHub Actions الأخير: [31912149444](https://github.com/ahmedsheta89-cell/elhawary-careers/actions/runs/31912149444)
+رابط تشغيل GitHub Actions الأخير: [31912299367](https://github.com/ahmedsheta89-cell/elhawary-careers/actions/runs/31912299367)
 
 ## 6. حدود الخطة المجانية التي يجب عدم إخفائها
 
