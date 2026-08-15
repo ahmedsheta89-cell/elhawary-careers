@@ -47,11 +47,15 @@ const additionalIcons = [
 const BenefitsPage: React.FC = () => {
   const { content } = useSiteContent();
   const benefits = content.pages.benefits;
+  const appearance = benefits.appearance;
 
   return (
-    <div className="bg-background-alternate min-h-screen" dir="rtl">
+    <div className="min-h-screen" dir="rtl" style={{ backgroundColor: appearance.sectionBackground }}>
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-secondary-600 to-secondary-800 py-20 text-white md:py-28">
+      <section
+        className="py-20 md:py-28"
+        style={{ backgroundImage: `linear-gradient(135deg, ${appearance.heroFrom}, ${appearance.heroTo})` }}
+      >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -66,10 +70,10 @@ const BenefitsPage: React.FC = () => {
             >
               {getSiteText(benefits.eyebrow)}
             </Badge>
-            <h1 className="mb-6 text-4xl font-bold md:text-5xl lg:text-6xl">
+            <h1 className="mb-6 text-4xl font-bold md:text-5xl lg:text-6xl" style={{ color: appearance.heroText }}>
               {getSiteText(benefits.title)}
             </h1>
-            <p className="text-xl leading-relaxed text-secondary-100">
+            <p className="text-xl leading-relaxed" style={{ color: appearance.heroMuted }}>
               {getSiteText(benefits.description)}
             </p>
           </motion.div>
@@ -77,7 +81,7 @@ const BenefitsPage: React.FC = () => {
       </section>
 
       {/* Main Benefits Grid */}
-      <section className="bg-white py-20">
+      <section className="py-20" style={{ backgroundColor: appearance.sectionBackground }}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             variants={staggerContainer}
@@ -88,9 +92,9 @@ const BenefitsPage: React.FC = () => {
           >
             {benefits.items.map((benefit, index) => (
               <motion.div key={index} variants={fadeAnimations.fadeInUp}>
-                <Card hoverable className="h-full">
+                <Card hoverable className="h-full" style={{ backgroundColor: appearance.cardBackground, borderColor: appearance.cardBorder }}>
                   <div className="p-8">
-                    <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 text-white shadow-lg">
+                    <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl text-white shadow-lg" style={{ backgroundImage: `linear-gradient(135deg, ${appearance.accent}, ${appearance.heroTo})` }}>
                       {benefitIcons[benefit.icon] || (
                         <Heart className="h-8 w-8" />
                       )}
@@ -110,7 +114,8 @@ const BenefitsPage: React.FC = () => {
       </section>
 
       {/* Additional Benefits */}
-      <section className="bg-background-alternate py-20">
+      {appearance.showAdditional && (
+      <section className="py-20" style={{ backgroundColor: appearance.sectionBackground }}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -136,9 +141,9 @@ const BenefitsPage: React.FC = () => {
           >
             {benefits.additionalItems.map((item, index) => (
               <motion.div key={index} variants={fadeAnimations.fadeInUp}>
-                <Card className="h-full">
+                <Card className="h-full" style={{ backgroundColor: appearance.cardBackground, borderColor: appearance.cardBorder }}>
                   <div className="p-6">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-secondary-100 text-secondary-600">
+                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl" style={{ backgroundColor: appearance.cardBorder, color: appearance.accent }}>
                       {additionalIcons[index % additionalIcons.length]}
                     </div>
                     <h3 className="text-text-primary mb-2 text-lg font-semibold">
@@ -154,9 +159,11 @@ const BenefitsPage: React.FC = () => {
           </motion.div>
         </div>
       </section>
+      )}
 
       {/* Career Growth Section */}
-      <section className="bg-gradient-to-br from-primary-800 to-primary-900 py-20 text-white">
+      {appearance.showGrowth && (
+      <section className="py-20" style={{ backgroundImage: `linear-gradient(135deg, ${appearance.heroTo}, ${appearance.heroFrom})`, color: appearance.heroText }}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <motion.div
@@ -168,7 +175,7 @@ const BenefitsPage: React.FC = () => {
               <h2 className="mb-6 text-3xl font-bold md:text-4xl">
                 {getSiteText(benefits.growthTitle)}
               </h2>
-              <p className="mb-8 text-lg leading-relaxed text-primary-100">
+              <p className="mb-8 text-lg leading-relaxed" style={{ color: appearance.heroMuted }}>
                 {getSiteText(benefits.growthDescription)}
               </p>
 
@@ -179,9 +186,9 @@ const BenefitsPage: React.FC = () => {
                     <div className="flex-1 rounded-lg bg-primary-700/50 p-4">
                       <div className="flex items-center justify-between">
                           <span className="font-semibold">{getSiteText(stage.level)}</span>
-                        <span className="text-sm text-primary-200">
-                          {getSiteText(stage.time)}
-                        </span>
+                          <span className="text-sm" style={{ color: appearance.heroMuted }}>
+                            {getSiteText(stage.time)}
+                          </span>
                       </div>
                     </div>
                   </div>
@@ -211,9 +218,11 @@ const BenefitsPage: React.FC = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* CTA Section */}
-      <section className="bg-white py-20">
+      {appearance.showCta && (
+      <section className="py-20" style={{ backgroundColor: appearance.sectionBackground }}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -254,6 +263,7 @@ const BenefitsPage: React.FC = () => {
           </motion.div>
         </div>
       </section>
+      )}
     </div>
   );
 };

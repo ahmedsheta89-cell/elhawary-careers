@@ -25,6 +25,7 @@ import {
   type SiteContent,
 } from '@/services/siteContentService';
 import type { Job } from '@/types';
+import { PageContentEditor } from './PageContentEditor';
 
 const statusLabels: Record<AdminApplication['status'], string> = {
   pending: 'جديد',
@@ -358,6 +359,24 @@ export function AdminPage() {
           ? 'صيغة المحتوى غير صحيحة. راجع الأقواس والفواصل في محرر JSON.'
           : 'تعذر حفظ محتوى الموقع. تحقق من الصلاحيات وصحة البيانات.'
       );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const saveStructuredSiteContent = async () => {
+    setIsSubmitting(true);
+    setContentSaved(false);
+    setError(null);
+    try {
+      const saved = await saveSiteContent(siteContent);
+      setSiteContent(saved);
+      setContentJson(JSON.stringify(saved, null, 2));
+      setContentSaved(true);
+      await adminService.recordContentUpdate('pages.about,pages.benefits');
+    } catch (saveError) {
+      console.error(saveError);
+      setError('تعذر حفظ محتوى الصفحتين. تحقق من الصلاحيات وصحة البيانات.');
     } finally {
       setIsSubmitting(false);
     }
@@ -1236,6 +1255,19 @@ export function AdminPage() {
                 </Button>
               </div>
             </form>
+
+            <PageContentEditor
+              value={siteContent}
+              onChange={(next) => {
+                setSiteContent(next);
+                setContentJson(JSON.stringify(next, null, 2));
+                setContentSaved(false);
+              }}
+              onSave={() => void saveStructuredSiteContent()}
+              onReset={resetSiteContentEditor}
+              saving={isSubmitting}
+              saved={contentSaved}
+            />
 
             <form
               onSubmit={(event) => void saveSiteContentSettings(event)}

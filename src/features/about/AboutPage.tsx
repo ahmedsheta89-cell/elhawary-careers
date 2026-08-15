@@ -25,11 +25,15 @@ const valueIcons = [
 const AboutPage: React.FC = () => {
   const { content } = useSiteContent();
   const about = content.pages.about;
+  const appearance = about.appearance;
 
   return (
-    <div className="bg-background-alternate min-h-screen" dir="rtl">
+    <div className="min-h-screen" dir="rtl" style={{ backgroundColor: appearance.sectionBackground }}>
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary-700 to-primary-900 py-20 text-white md:py-28">
+      <section
+        className="py-20 md:py-28"
+        style={{ backgroundImage: `linear-gradient(135deg, ${appearance.heroFrom}, ${appearance.heroTo})` }}
+      >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -37,10 +41,10 @@ const AboutPage: React.FC = () => {
             transition={{ duration: 0.8 }}
             className="mx-auto max-w-4xl text-center"
           >
-            <h1 className="mb-6 text-4xl font-bold md:text-5xl lg:text-6xl">
+            <h1 className="mb-6 text-4xl font-bold md:text-5xl lg:text-6xl" style={{ color: appearance.heroText }}>
               {getSiteText(about.title)}
             </h1>
-            <p className="text-xl leading-relaxed text-primary-100">
+            <p className="text-xl leading-relaxed" style={{ color: appearance.heroMuted }}>
               {getSiteText(about.description)}
             </p>
           </motion.div>
@@ -48,7 +52,8 @@ const AboutPage: React.FC = () => {
       </section>
 
       {/* Our Story */}
-      <section className="bg-white py-20">
+      {appearance.showStory && (
+      <section className="py-20" style={{ backgroundColor: appearance.sectionBackground }}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <motion.div
@@ -94,19 +99,21 @@ const AboutPage: React.FC = () => {
                       />
                     </svg>
                   </div>
-                  <p className="text-lg font-semibold text-primary-700">
+                  <p className="text-lg font-semibold" style={{ color: appearance.accent }}>
                     {getSiteText(about.foundationLabel)}
                   </p>
-                  <p className="text-primary-600">{getSiteText(about.foundationDescription)}</p>
+                  <p style={{ color: appearance.accent }}>{getSiteText(about.foundationDescription)}</p>
                 </div>
               </div>
             </motion.div>
           </div>
         </div>
       </section>
+      )}
 
       {/* Stats Section */}
-      <section className="bg-primary-900 py-20 text-white">
+      {appearance.showStats && (
+      <section className="py-20" style={{ backgroundColor: appearance.heroTo, color: appearance.heroText }}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             variants={staggerContainer}
@@ -121,10 +128,10 @@ const AboutPage: React.FC = () => {
                 variants={fadeAnimations.fadeInUp}
                 className="text-center"
               >
-                <div className="mb-2 text-4xl font-bold text-secondary-400 sm:text-5xl lg:text-6xl">
+                <div className="mb-2 text-4xl font-bold sm:text-5xl lg:text-6xl" style={{ color: appearance.accent }}>
                   {stat.value}
                 </div>
-                <div className="text-lg font-medium text-primary-100">
+                <div className="text-lg font-medium" style={{ color: appearance.heroMuted }}>
                   {getSiteText(stat.label)}
                 </div>
               </motion.div>
@@ -132,9 +139,11 @@ const AboutPage: React.FC = () => {
           </motion.div>
         </div>
       </section>
+      )}
 
       {/* Values Section */}
-      <section className="bg-white py-20">
+      {appearance.showValues && (
+      <section className="py-20" style={{ backgroundColor: appearance.sectionBackground }}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -160,9 +169,9 @@ const AboutPage: React.FC = () => {
           >
             {about.values.map((value, index) => (
               <motion.div key={index} variants={fadeAnimations.fadeInUp}>
-                <Card hoverable className="h-full">
+                <Card hoverable className="h-full" style={{ backgroundColor: appearance.cardBackground, borderColor: appearance.cardBorder }}>
                   <div className="p-8">
-                    <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary-100 text-primary-600">
+                    <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl" style={{ backgroundColor: appearance.cardBorder, color: appearance.accent }}>
                       {valueIcons[index % valueIcons.length]}
                     </div>
                     <h3 className="text-text-primary mb-2 text-xl font-semibold">
@@ -178,9 +187,11 @@ const AboutPage: React.FC = () => {
           </motion.div>
         </div>
       </section>
+      )}
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-r from-secondary-600 to-secondary-700 py-20">
+      {appearance.showCta && (
+      <section className="py-20" style={{ backgroundImage: `linear-gradient(90deg, ${appearance.ctaFrom}, ${appearance.ctaTo})` }}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -189,10 +200,10 @@ const AboutPage: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="mx-auto max-w-3xl text-center"
           >
-            <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
+            <h2 className="mb-4 text-3xl font-bold md:text-4xl" style={{ color: appearance.ctaText }}>
               {getSiteText(about.ctaTitle)}
             </h2>
-            <p className="mb-8 text-lg text-secondary-100">
+            <p className="mb-8 text-lg" style={{ color: appearance.ctaText }}>
               {getSiteText(about.ctaDescription)}
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
@@ -211,6 +222,7 @@ const AboutPage: React.FC = () => {
           </motion.div>
         </div>
       </section>
+      )}
     </div>
   );
 };

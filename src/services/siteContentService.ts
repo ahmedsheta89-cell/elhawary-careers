@@ -6,6 +6,26 @@ export type SiteText = {
   en: string;
 };
 
+export type PageAppearance = {
+  heroFrom: string;
+  heroTo: string;
+  heroText: string;
+  heroMuted: string;
+  sectionBackground: string;
+  cardBackground: string;
+  cardBorder: string;
+  accent: string;
+  ctaFrom: string;
+  ctaTo: string;
+  ctaText: string;
+  showStory: boolean;
+  showStats: boolean;
+  showValues: boolean;
+  showAdditional: boolean;
+  showGrowth: boolean;
+  showCta: boolean;
+};
+
 export type SiteContent = {
   site: {
     phone: string;
@@ -66,6 +86,7 @@ export type SiteContent = {
       ctaDescription: SiteText;
       ctaPrimary: SiteText;
       ctaSecondary: SiteText;
+      appearance: PageAppearance;
     };
     benefits: {
       eyebrow: SiteText;
@@ -84,6 +105,7 @@ export type SiteContent = {
       ctaDescription: SiteText;
       ctaPrimary: SiteText;
       ctaSecondary: SiteText;
+      appearance: PageAppearance;
     };
     contact: { eyebrow: SiteText; title: SiteText; description: SiteText; infoTitle: SiteText; infoDescription: SiteText; whatsappLabel: SiteText; formTitle: SiteText; hours: SiteText; address: SiteText };
   };
@@ -206,6 +228,25 @@ export const defaultSiteContent: SiteContent = {
       ctaDescription: text('نحن نبحث دائماً عن المواهب الطموحة للانضمام إلى فريقنا. اكتشف فرص عملك التالية معنا'),
       ctaPrimary: text('تصفح الوظائف'),
       ctaSecondary: text('اعرف المزايا'),
+      appearance: {
+        heroFrom: '#0f4c81',
+        heroTo: '#0b2f4f',
+        heroText: '#ffffff',
+        heroMuted: '#dbeafe',
+        sectionBackground: '#ffffff',
+        cardBackground: '#ffffff',
+        cardBorder: '#dbeafe',
+        accent: '#2563eb',
+        ctaFrom: '#0ea5e9',
+        ctaTo: '#0284c7',
+        ctaText: '#ffffff',
+        showStory: true,
+        showStats: true,
+        showValues: true,
+        showAdditional: true,
+        showGrowth: true,
+        showCta: true,
+      },
     },
     benefits: {
       eyebrow: text('المزايا والعوائد'),
@@ -245,6 +286,25 @@ export const defaultSiteContent: SiteContent = {
       ctaDescription: text('اكتشف الوظائف المتاحة وقدم طلبك اليوم لتصبح جزءاً من عائلتنا'),
       ctaPrimary: text('تصفح الوظائف'),
       ctaSecondary: text('تواصل معنا'),
+      appearance: {
+        heroFrom: '#0f766e',
+        heroTo: '#134e4a',
+        heroText: '#ffffff',
+        heroMuted: '#ccfbf1',
+        sectionBackground: '#ffffff',
+        cardBackground: '#ffffff',
+        cardBorder: '#ccfbf1',
+        accent: '#0f766e',
+        ctaFrom: '#14b8a6',
+        ctaTo: '#0f766e',
+        ctaText: '#ffffff',
+        showStory: true,
+        showStats: true,
+        showValues: true,
+        showAdditional: true,
+        showGrowth: true,
+        showCta: true,
+      },
     },
     contact: { eyebrow: text('نحن هنا لمساعدتك'), title: text('تواصل معنا'), description: text('فريق التوظيف جاهز للإجابة عن استفساراتك'), infoTitle: text('معلومات التواصل'), infoDescription: text('يمكنك التواصل معنا عبر أي من القنوات التالية، وسنرد عليك في أقرب وقت ممكن'), whatsappLabel: text('ابدأ المحادثة'), formTitle: text('أرسل لنا رسالة'), hours: text('من السبت إلى الخميس، من 9 صباحاً إلى 5 مساءً'), address: text('جمهورية مصر العربية') },
   },
@@ -306,8 +366,22 @@ function mergeContent(value: Partial<SiteContent> | undefined): SiteContent {
       ...defaultSiteContent.pages,
       ...value?.pages,
       careers: { ...defaultSiteContent.pages.careers, ...value?.pages?.careers },
-      about: { ...defaultSiteContent.pages.about, ...value?.pages?.about },
-      benefits: { ...defaultSiteContent.pages.benefits, ...value?.pages?.benefits },
+      about: {
+        ...defaultSiteContent.pages.about,
+        ...value?.pages?.about,
+        appearance: {
+          ...defaultSiteContent.pages.about.appearance,
+          ...value?.pages?.about?.appearance,
+        },
+      },
+      benefits: {
+        ...defaultSiteContent.pages.benefits,
+        ...value?.pages?.benefits,
+        appearance: {
+          ...defaultSiteContent.pages.benefits.appearance,
+          ...value?.pages?.benefits?.appearance,
+        },
+      },
       contact: { ...defaultSiteContent.pages.contact, ...value?.pages?.contact },
     },
     legal: {

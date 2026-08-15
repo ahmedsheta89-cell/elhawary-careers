@@ -186,6 +186,10 @@ class AdminService {
     }
   }
 
+  async recordContentUpdate(section: string) {
+    await this.writeAuditLog('update_site_content', 'settings', 'content', { section });
+  }
+
   async saveSiteSettings(whatsappNumber: string): Promise<SiteSettings> {
     const { db } = requireFirebase();
     const normalized = normalizeWhatsAppNumber(whatsappNumber);
