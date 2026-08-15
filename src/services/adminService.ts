@@ -26,6 +26,19 @@ import {
   type SiteSettings,
 } from '@/services/siteSettingsService';
 
+export type GoogleSheetsSettings = {
+  clientId: string;
+  spreadsheetId: string;
+  sheetName: string;
+  updatedAt?: string;
+};
+
+const DEFAULT_GOOGLE_SHEETS_SETTINGS: GoogleSheetsSettings = {
+  clientId: '',
+  spreadsheetId: '',
+  sheetName: 'Applications',
+};
+
 export type StaffRole = 'hr';
 
 export type StaffMember = {
@@ -188,6 +201,62 @@ class AdminService {
 
   async recordContentUpdate(section: string) {
     await this.writeAuditLog('update_site_content', 'settings', 'content', { section });
+  }
+
+  async getGoogleSheetsSettings(): Promise<GoogleSheetsSettings> {
+    const { db } = requireFirebase();
+    try {
+      const snapshot = await getDoc(doc(db, 'settings', 'googleSheets'));
+      const value = snapshot.data() ?? {};
+      return {
+        clientId: typeof value.clientId === 'string' ? value.clientId : DEFAULT_GOOGLE_SHEETS_SETTINGS.clientId,
+        spreadsheetId: typeof value.spreadsheetId === 'string' ? value.spreadsheetId : DEFAULT_GOOGLE_SHEETS_SETTINGS.spreadsheetId,
+        sheetName: typeof value.sheetName === 'string' && value.sheetName.trim()
+          ? value.sheetName
+          : DEFAULT_GOOGLE_SHEETS_SETTINGS.sheetName,
+        ...(typeof value.updatedAt === 'string' ? { updatedAt: value.updatedAt } : {}),
+      };
+    } catch (error) {
+      console.error('Unable to load Google Sheets settings', error);
+      return { ...DEFAULT_GOOGLE_SHEETS_SETTINGS };
+    }
+  }
+
+  async saveGoogleSheetsSettings(input: Omit<GoogleSheetsSettings, 'updatedAt'>): Promise<GoogleSheetsSettings> {
+    const { db } = requireFirebase();
+    const clientId = input.clientId.trim();
+    const spreadsheetId = input.spreadsheetId.trim();
+    const sheetName = input.sheetName.trim() || DEFAULT_GOOGLE_SHEETS_SETTINGS.sheetName;
+    if (clientId && !clientId.endsWith('.apps.googleusercontent.com')) {
+      throw new Error('Google Client ID غير صحيح. يجب أن ينتهي بـ .apps.googleusercontent.com.');
+    }
+    if (spreadsheetId && !/^[a-zA-Z0-9_-]{20,}$/.test(spreadsheetId)) {
+      throw new Error('معرّف ملف Google Sheets غير صحيح.');
+    }
+    if (sheetName.length > 80 || /[\r\n]/.test(sheetName)) {
+      throw new Error('اسم ورقة Google Sheets غير صحيح.');
+    }
+    const settings: GoogleSheetsSettings = {
+      clientId,
+      spreadsheetId,
+      sheetName,
+      updatedAt: new Date().toISOString(),
+    };
+    await setDoc(doc(db, 'settings', 'googleSheets'), settings, { merge: true });
+    await this.writeAuditLog('update_google_sheets_settings', 'settings', 'googleSheets', {
+      spreadsheetId: spreadsheetId ? 'configured' : 'cleared',
+      sheetName,
+    });
+    return settings;
+  }
+
+  async recordGoogleSheetsSync(result: { inserted: number; updated: number; spreadsheetId: string; sheetName: string }) {
+    await this.writeAuditLog('sync_google_sheets', 'settings', 'googleSheets', {
+      inserted: result.inserted,
+      updated: result.updated,
+      spreadsheetId: result.spreadsheetId,
+      sheetName: result.sheetName,
+    });
   }
 
   async saveSiteSettings(whatsappNumber: string): Promise<SiteSettings> {

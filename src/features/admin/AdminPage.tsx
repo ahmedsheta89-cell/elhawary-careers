@@ -26,6 +26,12 @@ import {
 } from '@/services/siteContentService';
 import type { Job } from '@/types';
 import { PageContentEditor } from './PageContentEditor';
+import {
+  authorizeGoogleSheets,
+  isGoogleSheetsConfigured,
+  syncApplicationsToGoogleSheet,
+} from '@/services/googleSheetsService';
+import type { GoogleSheetsSettings } from '@/services/adminService';
 
 const statusLabels: Record<AdminApplication['status'], string> = {
   pending: 'جديد',
@@ -230,6 +236,14 @@ export function AdminPage() {
   );
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
+  const [googleSheetsSettings, setGoogleSheetsSettings] = useState<GoogleSheetsSettings>({
+    clientId: '',
+    spreadsheetId: '',
+    sheetName: 'Applications',
+  });
+  const [googleSheetsSaved, setGoogleSheetsSaved] = useState(false);
+  const [googleSheetsStatus, setGoogleSheetsStatus] = useState<string | null>(null);
+  const [isSyncingGoogleSheets, setIsSyncingGoogleSheets] = useState(false);
 
   useEffect(() => {
     if (!hasFirebaseConfig()) {
@@ -271,17 +285,19 @@ export function AdminPage() {
         const loadedApplications = await adminService.getApplications();
         setApplications(loadedApplications);
         if (nextRole === 'admin') {
-          const [loadedJobs, loadedSettings, loadedStaff, loadedContent] = await Promise.all([
+            const [loadedJobs, loadedSettings, loadedStaff, loadedContent, loadedGoogleSheets] = await Promise.all([
             jobsService.getAllJobs(),
             adminService.getSiteSettings(),
             adminService.getStaffMembers(),
             getPublicSiteContent(),
+            adminService.getGoogleSheetsSettings(),
           ]);
           setJobs(loadedJobs);
           setWhatsappNumber(loadedSettings.whatsappNumber);
           setStaffMembers(loadedStaff);
           setSiteContent(loadedContent);
           setContentJson(JSON.stringify(loadedContent, null, 2));
+          setGoogleSheetsSettings(loadedGoogleSheets);
         } else {
           setJobs([]);
           setStaffMembers([]);
@@ -389,6 +405,48 @@ export function AdminPage() {
     const next = JSON.stringify(siteContent, null, 2);
     setContentJson(next);
     setContentSaved(false);
+  };
+
+  const saveGoogleSheetsSettings = async (event: FormEvent) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setGoogleSheetsSaved(false);
+    setGoogleSheetsStatus(null);
+    setError(null);
+    try {
+      const saved = await adminService.saveGoogleSheetsSettings(googleSheetsSettings);
+      setGoogleSheetsSettings(saved);
+      setGoogleSheetsSaved(true);
+    } catch (saveError) {
+      console.error(saveError);
+      setError(saveError instanceof Error ? saveError.message : 'تعذر حفظ إعدادات Google Sheets.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const syncWithGoogleSheets = async () => {
+    if (role !== 'admin') return;
+    setIsSyncingGoogleSheets(true);
+    setGoogleSheetsStatus(null);
+    setError(null);
+    try {
+      const accessToken = await authorizeGoogleSheets(googleSheetsSettings.clientId);
+      const result = await syncApplicationsToGoogleSheet({
+        accessToken,
+        spreadsheetId: googleSheetsSettings.spreadsheetId,
+        sheetName: googleSheetsSettings.sheetName,
+        applications,
+        jobs,
+      });
+      await adminService.recordGoogleSheetsSync(result);
+      setGoogleSheetsStatus(`تمت المزامنة: أضيف ${result.inserted}، وحُدّث ${result.updated} طلب.`);
+    } catch (syncError) {
+      console.error(syncError);
+      setError(syncError instanceof Error ? syncError.message : 'تعذرت مزامنة الطلبات مع Google Sheets.');
+    } finally {
+      setIsSyncingGoogleSheets(false);
+    }
   };
 
   const saveWhatsAppSettings = async (event: FormEvent) => {
@@ -1609,6 +1667,78 @@ export function AdminPage() {
               </div>
             </div>
           </div>
+          {role === 'admin' && (
+            <div className="mb-5 rounded-2xl border border-sky-100 bg-sky-50/60 p-4">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[.16em] text-sky-600">
+                    تكامل اختياري وآمن
+                  </p>
+                  <h3 className="mt-1 text-lg font-black text-slate-900">Google Sheets</h3>
+                  <p className="mt-1 max-w-3xl text-sm leading-7 text-slate-600">
+                    يظل Firestore المصدر الأساسي، ويمكنك مزامنة نسخة منظمة من الطلبات إلى ملف Google Sheets عند الطلب. لا يتم تخزين رمز Google المميز في Firestore؛ يبقى مؤقتاً داخل جلسة المتصفح.
+                  </p>
+                </div>
+                <span className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-sky-700 shadow-sm">
+                  المدير فقط
+                </span>
+              </div>
+              <form onSubmit={saveGoogleSheetsSettings} className="mt-4 grid gap-3 lg:grid-cols-3">
+                <Input
+                  label="Google OAuth Client ID"
+                  value={googleSheetsSettings.clientId}
+                  onChange={(event) => {
+                    setGoogleSheetsSettings((current) => ({ ...current, clientId: event.target.value }));
+                    setGoogleSheetsSaved(false);
+                  }}
+                  placeholder="123...apps.googleusercontent.com"
+                  dir="ltr"
+                />
+                <Input
+                  label="Spreadsheet ID"
+                  value={googleSheetsSettings.spreadsheetId}
+                  onChange={(event) => {
+                    setGoogleSheetsSettings((current) => ({ ...current, spreadsheetId: event.target.value }));
+                    setGoogleSheetsSaved(false);
+                  }}
+                  placeholder="المعرّف الموجود داخل رابط الملف"
+                  dir="ltr"
+                />
+                <Input
+                  label="اسم ورقة العمل"
+                  value={googleSheetsSettings.sheetName}
+                  onChange={(event) => {
+                    setGoogleSheetsSettings((current) => ({ ...current, sheetName: event.target.value }));
+                    setGoogleSheetsSaved(false);
+                  }}
+                  placeholder="Applications"
+                />
+                <div className="flex flex-wrap items-center gap-2 lg:col-span-3">
+                  <Button type="submit" size="sm" variant="outline" disabled={isSubmitting}>
+                    {isSubmitting ? 'جارٍ الحفظ...' : 'حفظ إعدادات Sheets'}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="primary"
+                    onClick={() => void syncWithGoogleSheets()}
+                    disabled={
+                      isSyncingGoogleSheets ||
+                      !isGoogleSheetsConfigured(googleSheetsSettings.clientId) ||
+                      !googleSheetsSettings.spreadsheetId.trim()
+                    }
+                  >
+                    {isSyncingGoogleSheets ? 'جارٍ المزامنة...' : 'مزامنة الطلبات الآن'}
+                  </Button>
+                  {googleSheetsSaved && <span className="text-sm font-bold text-emerald-700">تم حفظ الإعدادات.</span>}
+                  {googleSheetsStatus && <span className="text-sm font-bold text-sky-700">{googleSheetsStatus}</span>}
+                </div>
+              </form>
+              <p className="mt-3 text-xs leading-6 text-slate-500">
+                الإعداد الأولي يحتاج Google Cloud OAuth Client ID مع إضافة نطاق الموقع ضمن Authorized JavaScript origins، وتفعيل Google Sheets API، ثم مشاركة ملف Sheets مع حساب المدير. هذه العملية لا تستخدم Firebase Storage ولا تحتاج خادماً مدفوعاً.
+              </p>
+            </div>
+          )}
           <div className="mt-5 grid gap-3 rounded-2xl bg-slate-50 p-4 md:grid-cols-[minmax(0,1.5fr)_minmax(180px,1fr)_minmax(180px,1fr)_auto] md:items-end">
             <Input
               label="بحث في الطلبات"

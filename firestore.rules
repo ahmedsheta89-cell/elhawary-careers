@@ -107,7 +107,7 @@ service cloud.firestore {
     }
 
     match /settings/{settingId} {
-      allow read: if settingId in ['public', 'content'];
+      allow read: if settingId in ['public', 'content'] || (settingId == 'googleSheets' && isAdmin());
       allow create, update, delete: if isAdmin();
     }
 
