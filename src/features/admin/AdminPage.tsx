@@ -96,6 +96,18 @@ function downloadApplicationsCsv(rows: AdminApplication[], jobs: Job[]) {
   URL.revokeObjectURL(url);
 }
 
+function downloadJsonFile(filename: string, value: unknown) {
+  const blob = new Blob([JSON.stringify(value, null, 2)], {
+    type: 'application/json;charset=utf-8',
+  });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
 function withoutId(job: Job): JobAdminInput {
   return Object.fromEntries(
     Object.entries(job).filter(([key]) => key !== 'id')
@@ -210,6 +222,10 @@ export function AdminPage() {
   const [applicationSearch, setApplicationSearch] = useState('');
   const [applicationStatusFilter, setApplicationStatusFilter] = useState<'all' | AdminApplication['status']>('all');
   const [applicationJobFilter, setApplicationJobFilter] = useState('all');
+  const [newApplicationCount, setNewApplicationCount] = useState(0);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(
+    typeof Notification !== 'undefined' && Notification.permission === 'granted'
+  );
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -274,6 +290,54 @@ export function AdminPage() {
       }
     })();
   }, [user]);
+
+  useEffect(() => {
+    if (!user || !role || role === 'denied') return undefined;
+    let knownApplicationIds: Set<string> | null = null;
+    let cancelled = false;
+
+    const refreshApplications = async () => {
+      try {
+        const latest = await adminService.getApplications();
+        if (cancelled) return;
+        const latestIds = new Set(latest.map((application) => application.id));
+        if (knownApplicationIds) {
+          const added = latest.filter((application) => !knownApplicationIds?.has(application.id));
+          if (added.length > 0) {
+            setNewApplicationCount((current) => current + added.length);
+            if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+              new Notification('طلب توظيف جديد - El Hawary Careers', {
+                body: `وصل ${added.length} طلب جديد إلى لوحة الإدارة.`,
+              });
+            }
+          }
+        }
+        knownApplicationIds = latestIds;
+        setApplications(latest);
+      } catch (refreshError) {
+        console.error('Application refresh failed', refreshError);
+      }
+    };
+
+    void refreshApplications();
+    const intervalId = window.setInterval(() => void refreshApplications(), 60_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [role, user]);
+
+  const enableBrowserNotifications = async () => {
+    if (typeof Notification === 'undefined') {
+      setError('هذا المتصفح لا يدعم تنبيهات سطح المكتب.');
+      return;
+    }
+    const permission = await Notification.requestPermission();
+    setNotificationsEnabled(permission === 'granted');
+    if (permission !== 'granted') {
+      setError('لم يتم السماح بتنبيهات المتصفح. يمكنك تفعيلها من إعدادات المتصفح.');
+    }
+  };
 
   const saveSiteContentSettings = async (event: FormEvent) => {
     event.preventDefault();
@@ -433,6 +497,19 @@ export function AdminPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const downloadAdminBackup = () => {
+    downloadJsonFile(`elhawary-backup-${new Date().toISOString().slice(0, 10)}.json`, {
+      exportedAt: new Date().toISOString(),
+      project: 'elhawary-careers-2026',
+      note: 'نسخة احتياطية محلية أنشأها المدير من لوحة الإدارة.',
+      jobs,
+      applications,
+      settings: { whatsappNumber },
+      siteContent: role === 'admin' ? siteContent : undefined,
+      staffMembers: role === 'admin' ? staffMembers : undefined,
+    });
   };
 
   const updateStatus = async (
@@ -728,6 +805,19 @@ export function AdminPage() {
               !
             </span>
             {error}
+          </div>
+        )}
+        {newApplicationCount > 0 && (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 font-semibold text-emerald-800">
+            <span>وصلت {newApplicationCount} طلبات جديدة منذ فتح اللوحة.</span>
+            <Button
+              type="button"
+              variant="outline"
+              className="border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-100"
+              onClick={() => setNewApplicationCount(0)}
+            >
+              فهمت
+            </Button>
           </div>
         )}
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -1411,15 +1501,36 @@ export function AdminPage() {
             </div>
             <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500">
               <span>تابع المرشحين وتواصل معهم عبر واتساب</span>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => downloadApplicationsCsv(filteredApplications, jobs)}
-                disabled={filteredApplications.length === 0}
-              >
-                تصدير CSV
-              </Button>
+              <div className="flex flex-wrap items-center gap-2">
+                {role === 'admin' && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={downloadAdminBackup}
+                  >
+                    تنزيل نسخة احتياطية
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => void enableBrowserNotifications()}
+                  disabled={notificationsEnabled}
+                >
+                  {notificationsEnabled ? 'تنبيهات المتصفح مفعّلة' : 'تفعيل التنبيهات المجانية'}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => downloadApplicationsCsv(filteredApplications, jobs)}
+                  disabled={filteredApplications.length === 0}
+                >
+                  تصدير CSV
+                </Button>
+              </div>
             </div>
           </div>
           <div className="mt-5 grid gap-3 rounded-2xl bg-slate-50 p-4 md:grid-cols-[minmax(0,1.5fr)_minmax(180px,1fr)_minmax(180px,1fr)_auto] md:items-end">
