@@ -27,11 +27,26 @@ const config: Config = {
     extend: {
       // Colors - Healthcare Theme
       colors: {
-        border: 'hsl(var(--border))',
-        input: 'hsl(var(--input))',
-        ring: 'hsl(var(--ring))',
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
+        border: {
+          DEFAULT: '#E2E8F0',
+          default: '#E2E8F0',
+          strong: '#CBD5E1',
+        },
+        input: '#CBD5E1',
+        ring: '#2563EB',
+        background: {
+          DEFAULT: '#F8FAFC',
+          alternate: '#F1F5F9',
+          surface: '#FFFFFF',
+          soft: '#EFF6FF',
+        },
+        foreground: '#0F172A',
+        text: {
+          primary: '#0F172A',
+          secondary: '#475569',
+          muted: '#64748B',
+          inverse: '#FFFFFF',
+        },
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',

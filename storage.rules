@@ -8,8 +8,10 @@ service firebase.storage {
 
     match /applications/{jobId}/{fileName} {
       allow write: if request.resource != null
-        && request.resource.size < 10 * 1024 * 1024
-        && request.resource.contentType.matches('application/pdf|application/msword|application/vnd.openxmlformats-officedocument.wordprocessingml.document|image/.*');
+        && jobId.size() > 0
+        && fileName.matches('[a-zA-Z0-9-]+-(cv|certificate|recommendation)-[a-zA-Z0-9._-]+')
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('application/pdf|application/msword|application/vnd.openxmlformats-officedocument.wordprocessingml.document|image/jpeg|image/png');
       allow read: if isAdmin();
       allow delete: if isAdmin();
     }

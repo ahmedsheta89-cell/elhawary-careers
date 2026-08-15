@@ -6,21 +6,72 @@ service cloud.firestore {
       return request.auth != null && request.auth.token.admin == true;
     }
 
+    function isHR() {
+      return request.auth != null
+        && (
+          request.auth.token.hr == true
+          || (
+            request.auth.token.email != null
+            && exists(/databases/$(database)/documents/staffRoles/$(request.auth.token.email))
+          )
+        );
+    }
+
+    function canReviewApplications() {
+      return isAdmin() || isHR();
+    }
+
     match /jobs/{jobId} {
       allow read: if isAdmin() || resource.data.isActive == true;
       allow create, update, delete: if isAdmin();
     }
 
     match /applications/{applicationId} {
-      allow create: if request.resource.data.keys().hasAll([
-        'jobId', 'fullName', 'birthDate', 'email', 'phone', 'address',
-        'education', 'experience', 'cv', 'status', 'submittedAt', 'updatedAt'
+      allow create: if request.resource.data.keys().hasOnly([
+        'jobId', 'fullName', 'birthDate', 'email', 'phone', 'whatsappNumber',
+        'address', 'bio', 'education', 'experience', 'privacyConsent',
+        'cvDelivery', 'cvReceived', 'status', 'submittedAt', 'updatedAt'
       ])
       && request.resource.data.status == 'pending'
+      && request.resource.data.privacyConsent == true
+      && request.resource.data.jobId is string
+      && request.resource.data.jobId.size() > 0
+      && exists(/databases/$(database)/documents/jobs/$(request.resource.data.jobId))
+      && get(/databases/$(database)/documents/jobs/$(request.resource.data.jobId)).data.isActive == true
+      && request.resource.data.fullName is string
+      && request.resource.data.fullName.size() >= 2
       && request.resource.data.email is string
-      && request.resource.data.jobId is string;
+      && request.resource.data.email.size() <= 254
+      && request.resource.data.phone is string
+      && request.resource.data.phone.size() >= 8
+      && request.resource.data.whatsappNumber is string
+      && request.resource.data.whatsappNumber.size() >= 8
+      && request.resource.data.cvDelivery == 'whatsapp'
+      && request.resource.data.cvReceived == false;
 
-      allow read, update, delete: if isAdmin();
+      allow read: if canReviewApplications();
+      allow update: if canReviewApplications()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'status', 'updatedAt'
+        ])
+        && request.resource.data.status in [
+          'pending', 'reviewing', 'shortlisted', 'rejected', 'hired'
+        ];
+      allow delete: if isAdmin();
+    }
+
+    match /staffRoles/{email} {
+      allow read: if isAdmin()
+        || (
+          request.auth != null
+          && request.auth.token.email == email
+        );
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /settings/{settingId} {
+      allow read: if settingId in ['public', 'content'];
+      allow create, update, delete: if isAdmin();
     }
   }
 }

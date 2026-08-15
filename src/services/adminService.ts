@@ -1,27 +1,48 @@
 import {
   onAuthStateChanged,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
   type User,
 } from 'firebase/auth';
 import {
   collection,
+  deleteDoc,
+  doc,
+  getDoc,
   getDocs,
   orderBy,
   query,
+  setDoc,
   updateDoc,
-  doc,
   type DocumentData,
 } from 'firebase/firestore';
 import { getFirebaseInstances, hasFirebaseConfig } from '@/lib/firebase';
+import {
+  DEFAULT_WHATSAPP_NUMBER,
+  normalizeWhatsAppNumber,
+  type SiteSettings,
+} from '@/services/siteSettingsService';
+
+export type StaffRole = 'hr';
+
+export type StaffMember = {
+  id: string;
+  email: string;
+  role: StaffRole;
+  updatedAt?: string;
+};
 
 export type AdminApplication = DocumentData & {
   id: string;
   fullName: string;
   email: string;
   phone: string;
+  whatsappNumber?: string;
   jobId: string;
   status: 'pending' | 'reviewing' | 'shortlisted' | 'rejected' | 'hired';
+  cvDelivery?: 'whatsapp';
+  cvReceived?: boolean;
   submittedAt?: { toDate?: () => Date } | string;
 };
 
@@ -48,6 +69,50 @@ class AdminService {
     return signOut(auth);
   }
 
+  async sendPasswordReset(email: string) {
+    const { auth } = requireFirebase();
+    return sendPasswordResetEmail(auth, email);
+  }
+
+  async getStaffRole(email: string): Promise<StaffRole | null> {
+    const { db } = requireFirebase();
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail) return null;
+    const snapshot = await getDoc(doc(db, 'staffRoles', normalizedEmail));
+    return snapshot.data()?.role === 'hr' ? 'hr' : null;
+  }
+
+  async getStaffMembers(): Promise<StaffMember[]> {
+    const { db } = requireFirebase();
+    const snapshot = await getDocs(collection(db, 'staffRoles'));
+    return snapshot.docs
+      .map((item) => ({ id: item.id, ...item.data() }) as StaffMember)
+      .filter((item) => item.role === 'hr')
+      .sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''));
+  }
+
+  async grantHrRole(email: string): Promise<StaffMember> {
+    const { db } = requireFirebase();
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!/^\S+@\S+\.\S+$/.test(normalizedEmail)) {
+      throw new Error('اكتب بريداً إلكترونياً صحيحاً للموظف.');
+    }
+    const member: StaffMember = {
+      id: normalizedEmail,
+      email: normalizedEmail,
+      role: 'hr',
+      updatedAt: new Date().toISOString(),
+    };
+    await setDoc(doc(db, 'staffRoles', normalizedEmail), member);
+    return member;
+  }
+
+  async revokeHrRole(email: string) {
+    const { db } = requireFirebase();
+    const normalizedEmail = email.trim().toLowerCase();
+    await deleteDoc(doc(db, 'staffRoles', normalizedEmail));
+  }
+
   async getApplications(): Promise<AdminApplication[]> {
     const { db } = requireFirebase();
     const applicationsQuery = query(
@@ -69,6 +134,40 @@ class AdminService {
       status,
       updatedAt: new Date().toISOString(),
     });
+  }
+
+  async getSiteSettings(): Promise<SiteSettings> {
+    const { db } = requireFirebase();
+    try {
+      const snapshot = await getDoc(doc(db, 'settings', 'public'));
+      const value = snapshot.data()?.whatsappNumber;
+      return {
+        whatsappNumber:
+          typeof value === 'string' && normalizeWhatsAppNumber(value)
+            ? normalizeWhatsAppNumber(value)
+            : DEFAULT_WHATSAPP_NUMBER,
+        ...(typeof snapshot.data()?.updatedAt === 'string'
+          ? { updatedAt: snapshot.data()?.updatedAt as string }
+          : {}),
+      };
+    } catch (error) {
+      console.error('Unable to load site settings', error);
+      return { whatsappNumber: DEFAULT_WHATSAPP_NUMBER };
+    }
+  }
+
+  async saveSiteSettings(whatsappNumber: string): Promise<SiteSettings> {
+    const { db } = requireFirebase();
+    const normalized = normalizeWhatsAppNumber(whatsappNumber);
+    if (normalized.length < 10 || normalized.length > 15) {
+      throw new Error('رقم واتساب يجب أن يتكون من 10 إلى 15 رقماً.');
+    }
+    const settings: SiteSettings = {
+      whatsappNumber: normalized,
+      updatedAt: new Date().toISOString(),
+    };
+    await setDoc(doc(db, 'settings', 'public'), settings, { merge: true });
+    return settings;
   }
 }
 

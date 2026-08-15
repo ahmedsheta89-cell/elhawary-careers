@@ -3,9 +3,14 @@
  * Application success confirmation with animated success state
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { config } from '@/config';
+import {
+  getFallbackWhatsAppNumber,
+  getPublicSiteSettings,
+  toWhatsAppLinkNumber,
+} from '@/services/siteSettingsService';
 import { motion } from 'framer-motion';
 import { Button } from '@/app/components/ui/button';
 import { Card } from '@/app/components/ui/card';
@@ -14,7 +19,19 @@ import { CheckCircle, MessageCircle, Home, Share2 } from 'lucide-react';
 const SuccessPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const reference = searchParams.get('ref') || 'سيظهر بعد تأكيد الطلب';
-  const whatsappNumber = config.contact.phone.replace(/[^0-9]/g, '');
+  const [whatsappNumber, setWhatsappNumber] = useState(
+    getFallbackWhatsAppNumber()
+  );
+
+  useEffect(() => {
+    void getPublicSiteSettings().then((settings) => {
+      setWhatsappNumber(settings.whatsappNumber);
+    });
+  }, []);
+
+  const whatsappMessage = encodeURIComponent(
+    `مرحباً، أرسلت طلب توظيف إلى صيدلية الهواري. رقم الطلب: ${reference}. سأرسل السيرة الذاتية مرفقة بهذه الرسالة.`
+  );
 
   return (
     <div
@@ -83,7 +100,7 @@ const SuccessPage: React.FC = () => {
                 transition={{ delay: 0.3 }}
                 className="text-text-primary mb-4 text-2xl font-bold md:text-3xl"
               >
-                تم إرسال طلبك بنجاح!
+                تم تسجيل طلبك بنجاح!
               </motion.h1>
 
               <motion.p
@@ -137,10 +154,10 @@ const SuccessPage: React.FC = () => {
                   الخطوات التالية:
                 </h3>
                 <ul className="space-y-2 pr-7 text-right text-sm text-info-700">
-                  <li>• راقب بريدك الإلكتروني للتحديثات</li>
-                  <li>• تحقق من مجلد البريد العشوائي</li>
-                  <li>• احتفظ برقم الطلب المرجعي</li>
-                  <li>• يمكنكم التواصل معنا للاستفسار</li>
+                  <li>• احتفظ برقم الطلب المرجعي الظاهر أمامك</li>
+                  <li>• اضغط زر واتساب لإرسال السيرة الذاتية</li>
+                  <li>• اكتب رقم الطلب في رسالة واتساب</li>
+                  <li>• سيتواصل معك فريق الموارد البشرية عند المراجعة</li>
                 </ul>
               </motion.div>
 
@@ -159,12 +176,12 @@ const SuccessPage: React.FC = () => {
                   asChild
                 >
                   <a
-                    href={`https://wa.me/${whatsappNumber}`}
+                    href={`https://wa.me/${toWhatsAppLinkNumber(whatsappNumber)}?text=${whatsappMessage}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     <MessageCircle className="ml-2 h-5 w-5" />
-                    تواصل عبر واتساب
+                    إرسال السيرة الذاتية عبر واتساب
                   </a>
                 </Button>
 

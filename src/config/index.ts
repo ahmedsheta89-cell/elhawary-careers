@@ -43,7 +43,8 @@ export const config = {
   // Contact
   contact: {
     email: 'careers@elhawarypharmacy.com',
-    phone: '+20 123 456 7890',
+    phone: '01000753375',
+    whatsapp: import.meta.env.VITE_WHATSAPP_NUMBER || '',
   },
 } as const;
 

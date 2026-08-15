@@ -13,6 +13,10 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
+export function isDemoMode(): boolean {
+  return import.meta.env.VITE_DEMO_MODE === 'true';
+}
+
 export function hasFirebaseConfig(): boolean {
   return Boolean(
     firebaseConfig.apiKey &&

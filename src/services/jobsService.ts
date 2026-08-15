@@ -4,7 +4,6 @@ import {
   doc,
   getDoc,
   getDocs,
-  orderBy,
   query,
   setDoc,
   updateDoc,
@@ -12,7 +11,11 @@ import {
   type DocumentData,
 } from 'firebase/firestore';
 import type { Job } from '@/types';
-import { hasFirebaseConfig, getFirebaseInstances } from '@/lib/firebase';
+import {
+  getFirebaseInstances,
+  hasFirebaseConfig,
+  isDemoMode,
+} from '@/lib/firebase';
 import { MOCK_JOBS } from './mockData';
 
 function toDateString(value: unknown): string {
@@ -54,21 +57,26 @@ export type JobAdminInput = Omit<Job, 'id' | 'applicationCount'> & {
 class JobsService {
   async getActiveJobs(): Promise<Job[]> {
     if (!hasFirebaseConfig()) {
-      return MOCK_JOBS.filter((job) => job.isActive);
+      if (isDemoMode()) return MOCK_JOBS.filter((job) => job.isActive);
+      throw new Error('لم يتم إعداد Firebase. لا يمكن تحميل الوظائف حالياً.');
     }
 
     const { db } = getFirebaseInstances();
     const jobsQuery = query(
       collection(db, 'jobs'),
-      where('isActive', '==', true),
-      orderBy('postedDate', 'desc')
+      where('isActive', '==', true)
     );
     const snapshot = await getDocs(jobsQuery);
-    return snapshot.docs.map((item) => mapJob(item.id, item.data()));
+    return snapshot.docs
+      .map((item) => mapJob(item.id, item.data()))
+      .sort((a, b) => b.postedDate.localeCompare(a.postedDate));
   }
 
   async getAllJobs(): Promise<Job[]> {
-    if (!hasFirebaseConfig()) return MOCK_JOBS;
+    if (!hasFirebaseConfig()) {
+      if (isDemoMode()) return MOCK_JOBS;
+      throw new Error('لم يتم إعداد Firebase. لا يمكن تحميل الوظائف حالياً.');
+    }
     const { db } = getFirebaseInstances();
     const snapshot = await getDocs(collection(db, 'jobs'));
     return snapshot.docs
@@ -106,7 +114,10 @@ class JobsService {
 
   async getJobById(id: string): Promise<Job | null> {
     if (!hasFirebaseConfig()) {
-      return MOCK_JOBS.find((job) => job.id === id) ?? null;
+      if (isDemoMode()) return MOCK_JOBS.find((job) => job.id === id) ?? null;
+      throw new Error(
+        'لم يتم إعداد Firebase. لا يمكن تحميل تفاصيل الوظيفة حالياً.'
+      );
     }
 
     const { db } = getFirebaseInstances();

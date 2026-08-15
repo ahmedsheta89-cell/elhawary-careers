@@ -9,6 +9,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Button } from '@/app/components/ui/button';
 import { NAVIGATION_ITEMS } from '@/constants';
+import { useSiteContent } from '@/hooks/useSiteContent';
+import { getSiteText } from '@/services/siteContentService';
 
 export interface HeaderProps {
   className?: string;
@@ -17,6 +19,8 @@ export interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ className }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { content } = useSiteContent();
+  const text = getSiteText;
 
   const isActive = (path: string) => {
     if (path === '/') {
@@ -58,10 +62,10 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-text-primary text-lg font-bold md:text-xl">
-                  صيدلية الهواري
+                  {content.brand.nameAr}
                 </h1>
                 <p className="text-text-muted -mt-1 text-xs">
-                  El Hawary Pharmacy
+                  {content.brand.nameEn}
                 </p>
               </div>
             </motion.div>
@@ -80,19 +84,20 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                     : 'text-text-secondary hover:text-text-primary hover:bg-neutral-100'
                 )}
               >
-                {item.labelAr}
+                {getSiteText(content.header[`${item.key}Label` as keyof typeof content.header] ?? { ar: item.labelAr, en: item.labelAr })}
               </Link>
             ))}
           </nav>
 
           {/* CTA Button - Desktop */}
           <div className="hidden items-center gap-4 md:flex">
-            <Button variant="outline" size="sm">
-              تسجيل الدخول
+            <Button asChild variant="outline" size="sm">
+              <Link to="/admin">{text(content.header.loginLabel)}</Link>
             </Button>
-            <Button size="sm">
-              قدم الآن
-              <svg
+            <Button asChild size="sm">
+              <Link to="/careers">
+                {text(content.header.applyLabel)}
+                <svg
                 className="mr-1 h-4 w-4"
                 fill="none"
                 stroke="currentColor"
@@ -104,7 +109,8 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                   strokeWidth={2}
                   d="M14 5l7 7m0 0l-7 7m7-7H3"
                 />
-              </svg>
+                </svg>
+              </Link>
             </Button>
           </div>
 
@@ -179,14 +185,20 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                         : 'text-text-secondary hover:text-text-primary hover:bg-neutral-100'
                     )}
                   >
-                    {item.labelAr}
+                    {getSiteText(content.header[`${item.key}Label` as keyof typeof content.header] ?? { ar: item.labelAr, en: item.labelAr })}
                   </Link>
                 ))}
                 <div className="border-border-default mt-4 space-y-3 border-t pt-4">
-                  <Button variant="outline" fullWidth>
-                    تسجيل الدخول
+                  <Button asChild variant="outline" fullWidth>
+                    <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)}>
+                      {text(content.header.loginLabel)}
+                    </Link>
                   </Button>
-                  <Button fullWidth>قدم الآن</Button>
+                  <Button asChild fullWidth>
+                    <Link to="/careers" onClick={() => setIsMobileMenuOpen(false)}>
+                      {text(content.header.applyLabel)}
+                    </Link>
+                  </Button>
                 </div>
               </nav>
             </motion.div>

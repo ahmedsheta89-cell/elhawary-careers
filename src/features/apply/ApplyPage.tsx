@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { CheckCircle, FileText, Mail, Phone, User } from 'lucide-react';
+import { CheckCircle, Mail, MessageCircle, Phone, User } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import { Card } from '@/app/components/ui/card';
-import { FileUpload } from '@/app/components/ui/file-upload';
 import { Input, Textarea } from '@/app/components/ui/input';
 import { useJob } from '@/hooks/useJobs';
 import {
@@ -12,18 +11,17 @@ import {
   type CreateApplicationInput,
 } from '@/services/applicationsService';
 
-type FormState = Omit<
-  CreateApplicationInput,
-  'jobId' | 'cvFile' | 'certificateFile' | 'recommendationFile'
->;
+type FormState = Omit<CreateApplicationInput, 'jobId'>;
 
 const initialForm: FormState = {
   fullName: '',
   birthDate: '',
   email: '',
   phone: '',
+  whatsappNumber: '',
   address: '',
   bio: '',
+  privacyConsent: false,
   education: {
     degree: '',
     institution: '',
@@ -43,7 +41,7 @@ const steps = [
   { number: 1, title: 'المعلومات الشخصية' },
   { number: 2, title: 'المؤهلات العلمية' },
   { number: 3, title: 'الخبرات العملية' },
-  { number: 4, title: 'المستندات' },
+  { number: 4, title: 'التواصل والمتابعة' },
 ];
 
 export function ApplyPage() {
@@ -52,11 +50,6 @@ export function ApplyPage() {
   const { job, isLoading } = useJob(id);
   const [currentStep, setCurrentStep] = useState(1);
   const [form, setForm] = useState<FormState>(initialForm);
-  const [cvFile, setCvFile] = useState<File | null>(null);
-  const [certificateFile, setCertificateFile] = useState<File | null>(null);
-  const [recommendationFile, setRecommendationFile] = useState<File | null>(
-    null
-  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -74,6 +67,7 @@ export function ApplyPage() {
         !form.birthDate ||
         !form.email ||
         !form.phone ||
+        !form.whatsappNumber ||
         !form.address)
     ) {
       return 'يرجى إكمال جميع البيانات الشخصية المطلوبة.';
@@ -94,8 +88,8 @@ export function ApplyPage() {
     ) {
       return 'يرجى إكمال بيانات الخبرة العملية.';
     }
-    if (currentStep === 4 && !cvFile) {
-      return 'السيرة الذاتية مطلوبة لإرسال الطلب.';
+    if (currentStep === 4 && !form.privacyConsent) {
+      return 'يجب الموافقة على سياسة الخصوصية قبل إرسال الطلب.';
     }
     return null;
   };
@@ -109,7 +103,7 @@ export function ApplyPage() {
 
   const handleSubmit = async () => {
     const validationError = validateStep();
-    if (validationError || !id || !cvFile) {
+    if (validationError || !id) {
       setError(validationError || 'بيانات التقديم غير مكتملة.');
       return;
     }
@@ -120,9 +114,6 @@ export function ApplyPage() {
       const result = await applicationsService.createApplication({
         ...form,
         jobId: id,
-        cvFile,
-        certificateFile: certificateFile ?? undefined,
-        recommendationFile: recommendationFile ?? undefined,
       });
       navigate(`/success/${id}?ref=${encodeURIComponent(result.reference)}`);
     } catch (submitError) {
@@ -261,6 +252,18 @@ export function ApplyPage() {
                       placeholder="+20 1XX XXX XXXX"
                       required
                       leftIcon={<Phone className="h-5 w-5" />}
+                    />
+                    <Input
+                      label="رقم واتساب لإرسال السيرة الذاتية"
+                      type="tel"
+                      value={form.whatsappNumber}
+                      onChange={(event) =>
+                        updateField('whatsappNumber', event.target.value)
+                      }
+                      placeholder="+20 1XX XXX XXXX"
+                      hint="اكتب الرقم مع مفتاح الدولة"
+                      required
+                      leftIcon={<MessageCircle className="h-5 w-5" />}
                     />
                   </div>
                   <Input
@@ -423,46 +426,44 @@ export function ApplyPage() {
 
               {currentStep === 4 && (
                 <motion.div
-                  key="documents"
+                  key="follow-up"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-6"
                 >
                   <h2 className="text-text-primary text-xl font-semibold">
-                    المستندات
+                    التواصل والمتابعة
                   </h2>
-                  <FileUpload
-                    label="السيرة الذاتية (CV)"
-                    accept=".pdf,.doc,.docx"
-                    maxSize={5 * 1024 * 1024}
-                    hint="PDF, DOC, DOCX — الحد الأقصى 5MB"
-                    required
-                    leftIcon={<FileText className="h-5 w-5" />}
-                    onFileSelect={(files) => setCvFile(files?.[0] ?? null)}
-                  />
-                  <FileUpload
-                    label="صورة المؤهل الدراسي"
-                    accept="image/*"
-                    maxSize={2 * 1024 * 1024}
-                    hint="JPG, PNG — الحد الأقصى 2MB"
-                    onFileSelect={(files) =>
-                      setCertificateFile(files?.[0] ?? null)
-                    }
-                  />
-                  <FileUpload
-                    label="خطاب التوصية (اختياري)"
-                    accept=".pdf,.doc,.docx"
-                    maxSize={5 * 1024 * 1024}
-                    hint="PDF, DOC, DOCX — الحد الأقصى 5MB"
-                    onFileSelect={(files) =>
-                      setRecommendationFile(files?.[0] ?? null)
-                    }
-                  />
-                  <div className="border-warning-200 rounded-lg border bg-warning-50 p-4 text-sm text-warning-700">
-                    تأكد من صحة جميع المعلومات قبل الإرسال. سيتم استخدام بياناتك
-                    لغرض التوظيف فقط.
+                  <div className="rounded-lg border border-primary-200 bg-primary-50 p-5 text-primary-800">
+                    <div className="mb-3 flex items-center gap-2 font-semibold">
+                      <MessageCircle className="h-5 w-5" />
+                      إرسال السيرة الذاتية عبر واتساب
+                    </div>
+                    <p className="text-sm leading-7">
+                      لا نطلب رفع السيرة الذاتية داخل الموقع حالياً. بعد إرسال
+                      الطلب سيظهر لك رقم مرجعي وزر واتساب لإرسال CV إلى فريق
+                      التوظيف، مع كتابة الرقم المرجعي في الرسالة.
+                    </p>
                   </div>
+                  <div className="border-warning-200 rounded-lg border bg-warning-50 p-4 text-sm leading-6 text-warning-700">
+                    تأكد من صحة جميع المعلومات قبل الإرسال. سيتم استخدام بياناتك
+                    لغرض التوظيف فقط، وسيتم التواصل معك عبر رقم واتساب المسجل.
+                  </div>
+                  <label className="text-text-secondary flex items-start gap-3 text-sm">
+                    <input
+                      type="checkbox"
+                      className="mt-1 h-4 w-4 accent-primary-600"
+                      checked={form.privacyConsent}
+                      onChange={(event) =>
+                        updateField('privacyConsent', event.target.checked)
+                      }
+                    />
+                    <span>
+                      أوافق على معالجة بياناتي الشخصية لغرض التوظيف وفقاً لسياسة
+                      الخصوصية وشروط الاستخدام.
+                    </span>
+                  </label>
                 </motion.div>
               )}
             </AnimatePresence>

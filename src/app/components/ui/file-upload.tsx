@@ -3,7 +3,7 @@
  * Drag and drop file upload with preview
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
@@ -41,17 +41,33 @@ const FileUpload = React.forwardRef<HTMLInputElement, FileUploadProps>(
     const [isDragOver, setIsDragOver] = useState(false);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [fileName, setFileName] = useState<string | null>(null);
+    const [validationError, setValidationError] = useState<string | null>(null);
+
+    useEffect(() => {
+      return () => {
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+      };
+    }, [previewUrl]);
 
     const handleFiles = useCallback(
       (files: FileList) => {
-        if (maxSize && files[0]?.size > maxSize) {
+        const file = files[0];
+        if (!file) return;
+        if (maxSize && file.size > maxSize) {
+          setValidationError(
+            `حجم الملف أكبر من الحد المسموح (${Math.round(maxSize / 1024 / 1024)}MB).`
+          );
+          setFileName(null);
+          setPreviewUrl(null);
+          onFileSelect?.(null);
           return;
         }
 
-        setFileName(files[0]?.name || null);
+        setValidationError(null);
+        setFileName(file.name);
 
-        if (files[0]?.type.startsWith('image/')) {
-          const url = URL.createObjectURL(files[0]);
+        if (file.type.startsWith('image/')) {
+          const url = URL.createObjectURL(file);
           setPreviewUrl(url);
         } else {
           setPreviewUrl(null);
@@ -211,7 +227,7 @@ const FileUpload = React.forwardRef<HTMLInputElement, FileUploadProps>(
           )}
         </div>
 
-        {error && (
+        {(error || validationError) && (
           <p
             className="mt-2 flex items-center gap-1 text-sm text-danger-500"
             role="alert"
@@ -223,7 +239,7 @@ const FileUpload = React.forwardRef<HTMLInputElement, FileUploadProps>(
                 clipRule="evenodd"
               />
             </svg>
-            {error}
+            {error || validationError}
           </p>
         )}
       </div>

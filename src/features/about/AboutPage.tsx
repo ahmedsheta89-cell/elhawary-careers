@@ -8,11 +8,24 @@ import { motion } from 'framer-motion';
 import { Button } from '@/app/components/ui/button';
 import { Card } from '@/app/components/ui/card';
 import { Badge } from '@/app/components/ui/badge';
-import { STATS } from '@/services/mockData';
 import { staggerContainer, fadeAnimations } from '@/styles/tokens.animation';
+import { getSiteText } from '@/services/siteContentService';
+import { useSiteContent } from '@/hooks/useSiteContent';
 import { Award, Target, Heart, Users, TrendingUp, Shield } from 'lucide-react';
 
+const valueIcons = [
+  <Heart className="h-8 w-8" />,
+  <Shield className="h-8 w-8" />,
+  <Users className="h-8 w-8" />,
+  <Target className="h-8 w-8" />,
+  <Award className="h-8 w-8" />,
+  <TrendingUp className="h-8 w-8" />,
+];
+
 const AboutPage: React.FC = () => {
+  const { content } = useSiteContent();
+  const about = content.pages.about;
+
   return (
     <div className="bg-background-alternate min-h-screen" dir="rtl">
       {/* Hero Section */}
@@ -25,11 +38,10 @@ const AboutPage: React.FC = () => {
             className="mx-auto max-w-4xl text-center"
           >
             <h1 className="mb-6 text-4xl font-bold md:text-5xl lg:text-6xl">
-              عن صيدلية الهواري
+              {getSiteText(about.title)}
             </h1>
             <p className="text-xl leading-relaxed text-primary-100">
-              من أكبر سلاسل الصيدليات في مصر، نقدم رعاية صحية متميزة منذ أكثر من
-              15 عاماً
+              {getSiteText(about.description)}
             </p>
           </motion.div>
         </div>
@@ -46,27 +58,15 @@ const AboutPage: React.FC = () => {
               transition={{ duration: 0.6 }}
             >
               <Badge variant="primary" size="lg" className="mb-4">
-                قصتنا
+                {getSiteText(about.storyBadge)}
               </Badge>
               <h2 className="text-text-primary mb-6 text-3xl font-bold md:text-4xl">
-                رحلة النجاح والتميز
+                {getSiteText(about.storyTitle)}
               </h2>
               <div className="text-text-secondary space-y-4 leading-relaxed">
-                <p>
-                  بدأت صيدلية الهواري رحلتها عام 2008 بفرع واحد صغير، والإيمان
-                  بأن الرعاية الصحية الجيدة حق للجميع. من خلال الالتزام بالجودة
-                  والخدمة المتميزة، نمونا لنصبح واحدة من أكبر سلاسل الصيدليات في
-                  جمهورية مصر العربية.
-                </p>
-                <p>
-                  اليوم، نضم أكثر من 50 فرعاً منتشراً في مختلف المحافظات،
-                  وفريقاً يتجاوز 200 موظف متخصص، نخدم يومياً آلاف العملاء بثقة
-                  واهتمام.
-                </p>
-                <p>
-                  رؤيتنا واضحة: أن نكون الخيار الأول للرعاية الصحية المجتمعية،
-                  وأن نوفر بيئة عمل محفزة تجذب أفضل الكوادر الطبية والخدمية.
-                </p>
+                {about.storyParagraphs.map((paragraph, index) => (
+                  <p key={index}>{getSiteText(paragraph)}</p>
+                ))}
               </div>
             </motion.div>
 
@@ -95,9 +95,9 @@ const AboutPage: React.FC = () => {
                     </svg>
                   </div>
                   <p className="text-lg font-semibold text-primary-700">
-                    منذ 2008
+                    {getSiteText(about.foundationLabel)}
                   </p>
-                  <p className="text-primary-600">نخدم المجتمع المصري</p>
+                  <p className="text-primary-600">{getSiteText(about.foundationDescription)}</p>
                 </div>
               </div>
             </motion.div>
@@ -115,7 +115,7 @@ const AboutPage: React.FC = () => {
             viewport={{ once: true, margin: '-100px' }}
             className="grid grid-cols-2 gap-8 md:grid-cols-4"
           >
-            {STATS.map((stat, index) => (
+            {content.home.stats.map((stat, index) => (
               <motion.div
                 key={index}
                 variants={fadeAnimations.fadeInUp}
@@ -125,7 +125,7 @@ const AboutPage: React.FC = () => {
                   {stat.value}
                 </div>
                 <div className="text-lg font-medium text-primary-100">
-                  {stat.label.ar}
+                  {getSiteText(stat.label)}
                 </div>
               </motion.div>
             ))}
@@ -144,10 +144,10 @@ const AboutPage: React.FC = () => {
             className="mb-16 text-center"
           >
             <h2 className="text-text-primary mb-4 text-3xl font-bold md:text-4xl">
-              قيمنا الأساسية
+              {getSiteText(about.valuesTitle)}
             </h2>
             <p className="text-text-secondary mx-auto max-w-2xl text-lg">
-              المبادئ التي نؤمن بها ونطبقها في كل ما نفعله
+              {getSiteText(about.valuesDescription)}
             </p>
           </motion.div>
 
@@ -158,53 +158,18 @@ const AboutPage: React.FC = () => {
             viewport={{ once: true, margin: '-50px' }}
             className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
           >
-            {[
-              {
-                icon: <Heart className="h-8 w-8" />,
-                title: 'الرعاية والإنسانية',
-                description:
-                  'نضع صحة وراحة عملائنا في المقام الأول، ونتعامل معهم بكل احترام وتعاطف',
-              },
-              {
-                icon: <Shield className="h-8 w-8" />,
-                title: 'الجودة والسلامة',
-                description:
-                  'نلتزم بأعلى معايير الجودة في المنتجات والخدمات لضمان سلامة الجميع',
-              },
-              {
-                icon: <Users className="h-8 w-8" />,
-                title: 'العمل الجماعي',
-                description:
-                  'نؤمن بقوة الفريق والتعاون لتحقيق الأهداف المشتركة',
-              },
-              {
-                icon: <Target className="h-8 w-8" />,
-                title: 'التميز المستمر',
-                description: 'نسعى دائماً للتطوير والتحسين في جميع جوانب عملنا',
-              },
-              {
-                icon: <Award className="h-8 w-8" />,
-                title: 'النزاهة والشفافية',
-                description: 'نتصرف بصدق وشفافية في تعاملاتنا مع الجميع',
-              },
-              {
-                icon: <TrendingUp className="h-8 w-8" />,
-                title: 'الابتكار والنمو',
-                description:
-                  'نشجع الأفكار الجديدة ونستثمر في تطوير مهارات فريقنا',
-              },
-            ].map((value, index) => (
+            {about.values.map((value, index) => (
               <motion.div key={index} variants={fadeAnimations.fadeInUp}>
                 <Card hoverable className="h-full">
                   <div className="p-8">
                     <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary-100 text-primary-600">
-                      {value.icon}
+                      {valueIcons[index % valueIcons.length]}
                     </div>
                     <h3 className="text-text-primary mb-2 text-xl font-semibold">
-                      {value.title}
+                      {getSiteText(value.title)}
                     </h3>
                     <p className="text-text-secondary leading-relaxed">
-                      {value.description}
+                      {getSiteText(value.description)}
                     </p>
                   </div>
                 </Card>
@@ -225,15 +190,14 @@ const AboutPage: React.FC = () => {
             className="mx-auto max-w-3xl text-center"
           >
             <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
-              انضم إلى عائلتنا
+              {getSiteText(about.ctaTitle)}
             </h2>
             <p className="mb-8 text-lg text-secondary-100">
-              نحن نبحث دائماً عن المواهب الطموحة للانضمام إلى فريقنا. اكتشف فرص
-              عملك التالية معنا
+              {getSiteText(about.ctaDescription)}
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Button size="lg" variant="neutral" asChild>
-                <Link to="/careers">تصفح الوظائف</Link>
+                <Link to="/careers">{getSiteText(about.ctaPrimary)}</Link>
               </Button>
               <Button
                 size="lg"
@@ -241,7 +205,7 @@ const AboutPage: React.FC = () => {
                 className="border-white text-white hover:bg-white/10"
                 asChild
               >
-                <Link to="/benefits">اعرف المزايا</Link>
+                <Link to="/benefits">{getSiteText(about.ctaSecondary)}</Link>
               </Button>
             </div>
           </motion.div>

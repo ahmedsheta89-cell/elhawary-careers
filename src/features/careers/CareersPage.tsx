@@ -18,6 +18,8 @@ import {
   JOB_TYPE_LABELS,
 } from '@/services/mockData';
 import { fadeAnimations, staggerContainer } from '@/styles/tokens.animation';
+import { useSiteContent } from '@/hooks/useSiteContent';
+import { getSiteText } from '@/services/siteContentService';
 import { Search, MapPin, Briefcase, DollarSign } from 'lucide-react';
 
 const CareersPage: React.FC = () => {
@@ -29,6 +31,8 @@ const CareersPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
   const { jobs, isLoading, error, reload } = useJobs();
+  const { content } = useSiteContent();
+  const { careers } = content.pages;
 
   // Extract unique locations
   const locations = useMemo(() => {
@@ -149,10 +153,10 @@ const CareersPage: React.FC = () => {
             className="mx-auto max-w-3xl text-center"
           >
             <h1 className="mb-4 text-4xl font-bold md:text-5xl">
-              الوظائف المتاحة
+              {getSiteText(careers.title)}
             </h1>
             <p className="text-lg text-primary-100">
-              اكتشف فرص عملك التالية في صيدلية الهواري
+              {getSiteText(careers.description)}
             </p>
           </motion.div>
         </div>
@@ -246,10 +250,10 @@ const CareersPage: React.FC = () => {
                 <Briefcase className="text-text-muted h-12 w-12" />
               </div>
               <h3 className="text-text-primary mb-2 text-xl font-semibold">
-                لا توجد وظائف مطابقة
+                {getSiteText(careers.emptyTitle)}
               </h3>
               <p className="text-text-secondary mb-6">
-                جرب تغيير معايير البحث أو الفلاتر
+                {getSiteText(careers.emptyDescription)}
               </p>
               <Button
                 variant="outline"

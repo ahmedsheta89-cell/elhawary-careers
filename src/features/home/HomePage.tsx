@@ -6,12 +6,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useJobs } from '@/hooks/useJobs';
+import { useSiteContent } from '@/hooks/useSiteContent';
+import { getSiteText } from '@/services/siteContentService';
 import { motion } from 'framer-motion';
 import { Button } from '@/app/components/ui/button';
 import { Card } from '@/app/components/ui/card';
 import { Badge } from '@/app/components/ui/badge';
 import {
-  STATS,
   TESTIMONIALS,
   HIRING_PROCESS,
   FAQ_ITEMS,
@@ -21,6 +22,8 @@ import { fadeAnimations, staggerContainer } from '@/styles/tokens.animation';
 
 const HomePage: React.FC = () => {
   const { jobs } = useJobs();
+  const { content } = useSiteContent();
+  const { home } = content;
   const featuredJobs = jobs.slice(0, 3);
 
   return (
@@ -45,19 +48,18 @@ const HomePage: React.FC = () => {
             className="mx-auto max-w-4xl text-center"
           >
             <Badge variant="secondary" size="lg" className="mb-6">
-              انضم إلى فريقنا الطبي المتميز
+              {getSiteText(home.heroEyebrow)}
             </Badge>
 
             <h1 className="mb-6 text-4xl font-bold leading-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
-              ابنِ مستقبلك المهني مع
+              {getSiteText(home.heroTitle)}
               <span className="mt-2 block text-secondary-300">
-                صيدلية الهواري
+                {getSiteText(home.heroHighlight)}
               </span>
             </h1>
 
             <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-primary-100 sm:text-xl">
-              نبحث عن الكوادر الطبية والخدمية الطموحة للانضمام إلى واحدة من أكبر
-              سلاسل الصيدليات في مصر. فرص نمو لا محدودة وبيئة عمل محفزة.
+              {getSiteText(home.heroDescription)}
             </p>
 
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
@@ -68,7 +70,7 @@ const HomePage: React.FC = () => {
                 asChild
               >
                 <Link to="/careers">
-                  تصفح الوظائف المتاحة
+                  {getSiteText(home.heroPrimaryCta)}
                   <svg
                     className="mr-2 h-5 w-5"
                     fill="none"
@@ -90,7 +92,7 @@ const HomePage: React.FC = () => {
                 className="border-white px-8 text-lg text-white hover:bg-white/10"
                 asChild
               >
-                <Link to="/about">اعرف المزيد عنا</Link>
+                <Link to="/about">{getSiteText(home.heroSecondaryCta)}</Link>
               </Button>
             </div>
           </motion.div>
@@ -123,7 +125,7 @@ const HomePage: React.FC = () => {
             viewport={{ once: true, margin: '-100px' }}
             className="grid grid-cols-2 gap-8 md:grid-cols-4"
           >
-            {STATS.map((stat) => (
+            {home.stats.map((stat) => (
               <motion.div
                 key={stat.label.ar}
                 variants={fadeAnimations.fadeInUp}
@@ -133,7 +135,7 @@ const HomePage: React.FC = () => {
                   {stat.value}
                 </div>
                 <div className="text-text-secondary font-medium">
-                  {stat.label.ar}
+                  {getSiteText(stat.label)}
                 </div>
               </motion.div>
             ))}
@@ -152,10 +154,10 @@ const HomePage: React.FC = () => {
             className="mb-16 text-center"
           >
             <h2 className="text-text-primary mb-4 text-3xl font-bold sm:text-4xl">
-              لماذا تنضم إلينا؟
+              {getSiteText(home.whyTitle)}
             </h2>
             <p className="text-text-secondary mx-auto max-w-2xl text-lg">
-              نقدم بيئة عمل استثنائية تدعم نموك المهني والشخصي
+              {getSiteText(home.whyDescription)}
             </p>
           </motion.div>
 
@@ -292,10 +294,10 @@ const HomePage: React.FC = () => {
                       {feature.icon}
                     </div>
                     <h3 className="text-text-primary mb-2 text-xl font-semibold">
-                      {feature.title}
+                      {getSiteText(home.whyItems[index]?.title) || feature.title}
                     </h3>
                     <p className="text-text-secondary leading-relaxed">
-                      {feature.description}
+                      {getSiteText(home.whyItems[index]?.description) || feature.description}
                     </p>
                   </div>
                 </Card>
@@ -317,15 +319,15 @@ const HomePage: React.FC = () => {
           >
             <div>
               <h2 className="text-text-primary mb-2 text-3xl font-bold sm:text-4xl">
-                أحدث الوظائف
+                {getSiteText(home.jobsTitle)}
               </h2>
               <p className="text-text-secondary text-lg">
-                اكتشف الفرص المتاحة وانضم لفريقنا
+                {getSiteText(home.jobsDescription)}
               </p>
             </div>
             <Button variant="outline" asChild>
               <Link to="/careers">
-                عرض كل الوظائف
+                {getSiteText(home.jobsCta)}
                 <svg
                   className="mr-2 h-4 w-4"
                   fill="none"
@@ -424,10 +426,10 @@ const HomePage: React.FC = () => {
             className="mb-16 text-center"
           >
             <h2 className="mb-4 text-3xl font-bold sm:text-4xl">
-              رحلة التوظيف
+              {getSiteText(home.processTitle)}
             </h2>
             <p className="mx-auto max-w-2xl text-lg text-primary-100">
-              خطوات بسيطة وواضحة للانضمام إلى فريقنا
+              {getSiteText(home.processDescription)}
             </p>
           </motion.div>
 
@@ -540,10 +542,10 @@ const HomePage: React.FC = () => {
             className="mb-16 text-center"
           >
             <h2 className="text-text-primary mb-4 text-3xl font-bold sm:text-4xl">
-              الأسئلة الشائعة
+              {getSiteText(home.faqTitle)}
             </h2>
             <p className="text-text-secondary mx-auto max-w-2xl text-lg">
-              إجابات على أسئلتك الأكثر تكراراً
+              {getSiteText(home.faqDescription)}
             </p>
           </motion.div>
 
@@ -599,11 +601,10 @@ const HomePage: React.FC = () => {
             className="mx-auto max-w-3xl text-center"
           >
             <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
-              جاهز لبدء رحلتك المهنية؟
+              {getSiteText(home.finalCtaTitle)}
             </h2>
             <p className="mb-8 text-lg text-secondary-100">
-              تصفح وظائفنا المتاحة وقدم طلبك اليوم. نحن في انتظار انضمامك
-              لعائلتنا
+              {getSiteText(home.finalCtaDescription)}
             </p>
             <Button
               size="lg"
@@ -611,7 +612,7 @@ const HomePage: React.FC = () => {
               className="px-8 text-lg shadow-xl"
               asChild
             >
-              <Link to="/careers">شاهد جميع الوظائف</Link>
+              <Link to="/careers">{getSiteText(home.finalCtaButton)}</Link>
             </Button>
           </motion.div>
         </div>

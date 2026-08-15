@@ -7,6 +7,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { config } from '@/config';
+import { useSiteContent } from '@/hooks/useSiteContent';
+import { getSiteText } from '@/services/siteContentService';
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
 
 interface FooterLink {
@@ -44,34 +46,20 @@ const footerSections: FooterSection[] = [
   },
 ];
 
-const contactInfo = [
-  {
-    icon: MapPin,
-    label: 'العنوان',
-    value: 'جمهورية مصر العربية',
-  },
-  {
-    icon: Phone,
-    label: 'الهاتف',
-    value: config.contact.phone,
-  },
-  {
-    icon: Mail,
-    label: 'البريد الإلكتروني',
-    value: config.contact.email,
-  },
-  {
-    icon: Clock,
-    label: 'ساعات العمل',
-    value: '9 صباحاً - 6 مساءً',
-  },
-];
-
 export interface FooterProps {
   className?: string;
 }
 
 const Footer: React.FC<FooterProps> = ({ className }) => {
+  const { content } = useSiteContent();
+  const text = getSiteText;
+  const contactInfo = [
+    { icon: MapPin, label: 'العنوان', value: text(content.pages.contact.address) },
+    { icon: Phone, label: 'الهاتف', value: '01000753375' },
+    { icon: Mail, label: 'البريد الإلكتروني', value: config.contact.email },
+    { icon: Clock, label: 'ساعات العمل', value: text(content.pages.contact.hours) },
+  ];
+
   return (
     <footer className={cn('bg-neutral-900 text-white', className)}>
       <div className="container mx-auto px-4 py-12 sm:px-6 md:py-16 lg:px-8">
@@ -95,13 +83,12 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
                 </svg>
               </div>
               <div>
-                <h3 className="text-xl font-bold">صيدلية الهواري</h3>
-                <p className="text-sm text-neutral-400">El Hawary Pharmacy</p>
+                  <h3 className="text-xl font-bold">{content.brand.nameAr}</h3>
+                <p className="text-sm text-neutral-400">{content.brand.nameEn}</p>
               </div>
             </Link>
             <p className="mb-6 text-sm leading-relaxed text-neutral-400">
-              منصة التوظيف الرسمية لصيدلية الهواري. نبحث عن أفضل الكوادر الطبية
-              والخدمية للانضمام إلى فريقنا المتميز.
+              {text(content.footer.description)}
             </p>
 
             {/* Social Links */}
@@ -159,7 +146,7 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
 
           {/* Contact Info */}
           <div>
-            <h4 className="mb-4 text-lg font-semibold">تواصل معنا</h4>
+            <h4 className="mb-4 text-lg font-semibold">{text(content.pages.contact.title)}</h4>
             <ul className="space-y-4">
               {contactInfo.map((item) => (
                 <li key={item.label} className="flex items-start gap-3">
@@ -178,20 +165,20 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
         <div className="mt-12 border-t border-neutral-800 pt-8">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <p className="text-center text-sm text-neutral-400 md:text-right">
-              © {new Date().getFullYear()} صيدلية الهواري. جميع الحقوق محفوظة.
+              © {new Date().getFullYear()} {content.brand.nameAr}. {text(content.footer.copyright)}.
             </p>
             <div className="flex gap-6">
               <Link
                 to="#"
                 className="text-sm text-neutral-400 transition-colors hover:text-white"
               >
-                سياسة الخصوصية
+                {text(content.footer.privacyLabel)}
               </Link>
               <Link
                 to="#"
                 className="text-sm text-neutral-400 transition-colors hover:text-white"
               >
-                شروط الاستخدام
+                {text(content.footer.termsLabel)}
               </Link>
             </div>
           </div>

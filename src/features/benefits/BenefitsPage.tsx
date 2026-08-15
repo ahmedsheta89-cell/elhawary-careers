@@ -8,8 +8,9 @@ import { motion } from 'framer-motion';
 import { Button } from '@/app/components/ui/button';
 import { Card } from '@/app/components/ui/card';
 import { Badge } from '@/app/components/ui/badge';
-import { BENEFITS_LIST } from '@/services/mockData';
 import { staggerContainer, fadeAnimations } from '@/styles/tokens.animation';
+import { getSiteText } from '@/services/siteContentService';
+import { useSiteContent } from '@/hooks/useSiteContent';
 import {
   Heart,
   TrendingUp,
@@ -32,7 +33,21 @@ const benefitIcons: Record<string, React.ReactNode> = {
   environment: <Smile className="h-8 w-8" />,
 };
 
+const additionalIcons = [
+  <GraduationCap className="h-6 w-6" />,
+  <ShieldCheck className="h-6 w-6" />,
+  <Users className="h-6 w-6" />,
+  <Award className="h-6 w-6" />,
+  <Smile className="h-6 w-6" />,
+  <DollarSign className="h-6 w-6" />,
+  <Clock className="h-6 w-6" />,
+  <TrendingUp className="h-6 w-6" />,
+];
+
 const BenefitsPage: React.FC = () => {
+  const { content } = useSiteContent();
+  const benefits = content.pages.benefits;
+
   return (
     <div className="bg-background-alternate min-h-screen" dir="rtl">
       {/* Hero Section */}
@@ -49,13 +64,13 @@ const BenefitsPage: React.FC = () => {
               size="lg"
               className="mb-4 bg-white/20 text-white"
             >
-              المزايا والعوائد
+              {getSiteText(benefits.eyebrow)}
             </Badge>
             <h1 className="mb-6 text-4xl font-bold md:text-5xl lg:text-6xl">
-              لماذا نعمل في صيدلية الهواري؟
+              {getSiteText(benefits.title)}
             </h1>
             <p className="text-xl leading-relaxed text-secondary-100">
-              نقدم حزمة شاملة من المزايا والعوائد لدعمك أنت وعائلتك
+              {getSiteText(benefits.description)}
             </p>
           </motion.div>
         </div>
@@ -71,7 +86,7 @@ const BenefitsPage: React.FC = () => {
             viewport={{ once: true, margin: '-50px' }}
             className="grid gap-8 md:grid-cols-2 lg:grid-cols-3"
           >
-            {BENEFITS_LIST.map((benefit, index) => (
+            {benefits.items.map((benefit, index) => (
               <motion.div key={index} variants={fadeAnimations.fadeInUp}>
                 <Card hoverable className="h-full">
                   <div className="p-8">
@@ -81,10 +96,10 @@ const BenefitsPage: React.FC = () => {
                       )}
                     </div>
                     <h3 className="text-text-primary mb-3 text-xl font-semibold">
-                      {benefit.title.ar}
+                      {getSiteText(benefit.title)}
                     </h3>
                     <p className="text-text-secondary leading-relaxed">
-                      {benefit.description.ar}
+                      {getSiteText(benefit.description)}
                     </p>
                   </div>
                 </Card>
@@ -105,10 +120,10 @@ const BenefitsPage: React.FC = () => {
             className="mb-16 text-center"
           >
             <h2 className="text-text-primary mb-4 text-3xl font-bold md:text-4xl">
-              مزايا إضافية
+              {getSiteText(benefits.additionalTitle)}
             </h2>
             <p className="text-text-secondary mx-auto max-w-2xl text-lg">
-              المزيد من العوائد التي نقدمها لموظفينا
+              {getSiteText(benefits.additionalDescription)}
             </p>
           </motion.div>
 
@@ -119,59 +134,18 @@ const BenefitsPage: React.FC = () => {
             viewport={{ once: true, margin: '-50px' }}
             className="grid gap-6 md:grid-cols-2 lg:grid-cols-4"
           >
-            {[
-              {
-                icon: <GraduationCap className="h-6 w-6" />,
-                title: 'منح دراسية',
-                description: 'دعم مالي للدراسات العليا والدورات المتخصصة',
-              },
-              {
-                icon: <ShieldCheck className="h-6 w-6" />,
-                title: 'تأمين على الحياة',
-                description: 'حماية مالية إضافية لك ولعائلتك',
-              },
-              {
-                icon: <Users className="h-6 w-6" />,
-                title: 'أنشطة فريق',
-                description: 'فعاليات ترفيهية واجتماعية دورية',
-              },
-              {
-                icon: <Award className="h-6 w-6" />,
-                title: 'برنامج الإحالة',
-                description: 'مكافآت عند ترشيح كوادر متميزة',
-              },
-              {
-                icon: <Smile className="h-6 w-6" />,
-                title: 'عيادة داخلية',
-                description: 'خدمات طبية مجانية في المقر الرئيسي',
-              },
-              {
-                icon: <DollarSign className="h-6 w-6" />,
-                title: 'خصومات خاصة',
-                description: 'خصومات على منتجات الصيدلية للموظفين',
-              },
-              {
-                icon: <Clock className="h-6 w-6" />,
-                title: 'إجازة أمومة/أبوة',
-                description: 'إجازات عائلية مدفوعة الأجر',
-              },
-              {
-                icon: <TrendingUp className="h-6 w-6" />,
-                title: 'خطة تقاعد',
-                description: 'برنامج ادخار للتقاعد المبكر',
-              },
-            ].map((item, index) => (
+            {benefits.additionalItems.map((item, index) => (
               <motion.div key={index} variants={fadeAnimations.fadeInUp}>
                 <Card className="h-full">
                   <div className="p-6">
                     <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-secondary-100 text-secondary-600">
-                      {item.icon}
+                      {additionalIcons[index % additionalIcons.length]}
                     </div>
                     <h3 className="text-text-primary mb-2 text-lg font-semibold">
-                      {item.title}
+                      {getSiteText(item.title)}
                     </h3>
                     <p className="text-text-secondary text-sm">
-                      {item.description}
+                      {getSiteText(item.description)}
                     </p>
                   </div>
                 </Card>
@@ -192,36 +166,21 @@ const BenefitsPage: React.FC = () => {
               transition={{ duration: 0.6 }}
             >
               <h2 className="mb-6 text-3xl font-bold md:text-4xl">
-                مسار النمو المهني
+                {getSiteText(benefits.growthTitle)}
               </h2>
               <p className="mb-8 text-lg leading-relaxed text-primary-100">
-                نؤمن بالاستثمار في موظفينا ونوفر مسارات ترقية واضحة ومعتمدة. من
-                خلال برامج التدريب والتطوير المستمر، يمكنك التقدم في مسارك
-                المهني وتحقيق أهدافك.
+                {getSiteText(benefits.growthDescription)}
               </p>
 
               <div className="space-y-4">
-                {[
-                  { level: 'مبتدئ', time: '0-2 سنة', color: 'bg-primary-600' },
-                  {
-                    level: 'متوسط',
-                    time: '2-4 سنوات',
-                    color: 'bg-primary-500',
-                  },
-                  { level: 'خبير', time: '4-6 سنوات', color: 'bg-primary-400' },
-                  {
-                    level: 'قيادي',
-                    time: '6+ سنوات',
-                    color: 'bg-secondary-500',
-                  },
-                ].map((stage, index) => (
+                {benefits.growthStages.map((stage, index) => (
                   <div key={index} className="flex items-center gap-4">
-                    <div className={`h-4 w-4 rounded-full ${stage.color}`} />
+                    <div className={`h-4 w-4 rounded-full ${['bg-primary-600', 'bg-primary-500', 'bg-primary-400', 'bg-secondary-500'][index % 4]}`} />
                     <div className="flex-1 rounded-lg bg-primary-700/50 p-4">
                       <div className="flex items-center justify-between">
-                        <span className="font-semibold">{stage.level}</span>
+                          <span className="font-semibold">{getSiteText(stage.level)}</span>
                         <span className="text-sm text-primary-200">
-                          {stage.time}
+                          {getSiteText(stage.time)}
                         </span>
                       </div>
                     </div>
@@ -242,9 +201,9 @@ const BenefitsPage: React.FC = () => {
                   <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-secondary-500 to-secondary-600 shadow-2xl">
                     <TrendingUp className="h-12 w-12 text-white" />
                   </div>
-                  <h3 className="mb-2 text-2xl font-bold">نمو لا محدود</h3>
+                  <h3 className="mb-2 text-2xl font-bold">{getSiteText(benefits.growthHighlightTitle)}</h3>
                   <p className="text-primary-100">
-                    فرص الترقية متاحة للجميع بناءً على الأداء والكفاءة
+                    {getSiteText(benefits.growthHighlightDescription)}
                   </p>
                 </div>
               </div>
@@ -264,15 +223,15 @@ const BenefitsPage: React.FC = () => {
             className="mx-auto max-w-3xl text-center"
           >
             <h2 className="text-text-primary mb-4 text-3xl font-bold md:text-4xl">
-              جاهز للانضمام؟
+              {getSiteText(benefits.ctaTitle)}
             </h2>
             <p className="text-text-secondary mb-8 text-lg">
-              اكتشف الوظائف المتاحة وقدم طلبك اليوم لتصبح جزءاً من عائلتنا
+              {getSiteText(benefits.ctaDescription)}
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Button size="lg" asChild>
                 <Link to="/careers">
-                  تصفح الوظائف
+                  {getSiteText(benefits.ctaPrimary)}
                   <svg
                     className="mr-2 h-5 w-5"
                     fill="none"
@@ -289,7 +248,7 @@ const BenefitsPage: React.FC = () => {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link to="/contact">تواصل معنا</Link>
+                <Link to="/contact">{getSiteText(benefits.ctaSecondary)}</Link>
               </Button>
             </div>
           </motion.div>

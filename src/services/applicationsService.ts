@@ -1,7 +1,10 @@
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { ref, uploadBytes } from 'firebase/storage';
 import { z } from 'zod';
-import { getFirebaseInstances, hasFirebaseConfig } from '@/lib/firebase';
+import {
+  getFirebaseInstances,
+  hasFirebaseConfig,
+  isDemoMode,
+} from '@/lib/firebase';
 
 const applicationSchema = z.object({
   jobId: z.string().min(1),
@@ -9,6 +12,7 @@ const applicationSchema = z.object({
   birthDate: z.string().min(1, 'تاريخ الميلاد مطلوب'),
   email: z.string().email('البريد الإلكتروني غير صحيح'),
   phone: z.string().trim().min(8, 'رقم الهاتف غير صحيح'),
+  whatsappNumber: z.string().trim().min(8, 'رقم واتساب غير صحيح'),
   address: z.string().trim().min(2, 'العنوان مطلوب'),
   bio: z.string().trim().optional(),
   education: z.object({
@@ -27,6 +31,9 @@ const applicationSchema = z.object({
     endDate: z.string().optional(),
     description: z.string().trim().optional(),
   }),
+  privacyConsent: z.literal(true, {
+    errorMap: () => ({ message: 'يجب الموافقة على سياسة الخصوصية.' }),
+  }),
 });
 
 export interface CreateApplicationInput {
@@ -35,6 +42,7 @@ export interface CreateApplicationInput {
   birthDate: string;
   email: string;
   phone: string;
+  whatsappNumber: string;
   address: string;
   bio?: string;
   education: {
@@ -50,31 +58,7 @@ export interface CreateApplicationInput {
     endDate?: string;
     description?: string;
   };
-  cvFile: File;
-  certificateFile?: File;
-  recommendationFile?: File;
-}
-
-async function uploadAttachment(
-  storage: ReturnType<typeof getFirebaseInstances>['storage'],
-  jobId: string,
-  file: File,
-  kind: string
-) {
-  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '-');
-  const fileRef = ref(
-    storage,
-    `applications/${jobId}/${crypto.randomUUID()}-${kind}-${safeName}`
-  );
-  await uploadBytes(fileRef, file, {
-    contentType: file.type || 'application/octet-stream',
-  });
-  return {
-    path: fileRef.fullPath,
-    name: file.name,
-    contentType: file.type || 'application/octet-stream',
-    size: file.size,
-  };
+  privacyConsent: boolean;
 }
 
 class ApplicationsService {
@@ -84,6 +68,10 @@ class ApplicationsService {
     const validated = applicationSchema.parse(input);
 
     if (!hasFirebaseConfig()) {
+      if (!isDemoMode()) {
+        throw new Error('لم يتم إعداد Firebase. لا يمكن إرسال الطلب حالياً.');
+      }
+
       const id = crypto.randomUUID();
       const reference = `ELH-${id.slice(0, 8).toUpperCase()}`;
       const localApplications = JSON.parse(
@@ -94,6 +82,8 @@ class ApplicationsService {
         id,
         reference,
         status: 'pending',
+        cvDelivery: 'whatsapp',
+        cvReceived: false,
         submittedAt: new Date().toISOString(),
       });
       localStorage.setItem(
@@ -103,34 +93,12 @@ class ApplicationsService {
       return { id, reference };
     }
 
-    const { db, storage } = getFirebaseInstances();
-    const [cv, certificate, recommendation] = await Promise.all([
-      uploadAttachment(storage, input.jobId, input.cvFile, 'cv'),
-      input.certificateFile
-        ? uploadAttachment(
-            storage,
-            input.jobId,
-            input.certificateFile,
-            'certificate'
-          )
-        : Promise.resolve(null),
-      input.recommendationFile
-        ? uploadAttachment(
-            storage,
-            input.jobId,
-            input.recommendationFile,
-            'recommendation'
-          )
-        : Promise.resolve(null),
-    ]);
-
+    const { db } = getFirebaseInstances();
     const applicationRef = await addDoc(collection(db, 'applications'), {
       ...validated,
-      jobId: input.jobId,
-      cv,
-      certificate,
-      recommendation,
       status: 'pending',
+      cvDelivery: 'whatsapp',
+      cvReceived: false,
       submittedAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });

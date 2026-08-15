@@ -9,9 +9,13 @@ import { Card } from '@/app/components/ui/card';
 import { Input, Textarea } from '@/app/components/ui/input';
 import { MapPin, Phone, Mail, Clock, MessageCircle, Send } from 'lucide-react';
 import { config } from '@/config';
+import { useSiteContent } from '@/hooks/useSiteContent';
+import { getSiteText } from '@/services/siteContentService';
 
 const ContactPage: React.FC = () => {
-  const whatsappNumber = config.contact.phone.replace(/[^0-9]/g, '');
+  const { content } = useSiteContent();
+  const { contact } = content.pages;
+  const whatsappNumber = content.site.phone.replace(/[^0-9]/g, '') || config.contact.phone.replace(/[^0-9]/g, '');
 
   return (
     <div className="bg-background-alternate min-h-screen" dir="rtl">
@@ -25,10 +29,10 @@ const ContactPage: React.FC = () => {
             className="mx-auto max-w-4xl text-center"
           >
             <h1 className="mb-6 text-4xl font-bold md:text-5xl lg:text-6xl">
-              تواصل معنا
+              {getSiteText(contact.title)}
             </h1>
             <p className="text-xl leading-relaxed text-primary-100">
-              نحن هنا للإجابة على جميع استفساراتك ومساعدتك في رحلتك المهنية
+              {getSiteText(contact.description)}
             </p>
           </motion.div>
         </div>
@@ -48,11 +52,10 @@ const ContactPage: React.FC = () => {
             >
               <div>
                 <h2 className="text-text-primary mb-6 text-2xl font-bold">
-                  معلومات التواصل
+                  {getSiteText(contact.infoTitle)}
                 </h2>
                 <p className="text-text-secondary leading-relaxed">
-                  يمكنك التواصل معنا عبر أي من القنوات التالية، وسنرد عليك في
-                  أقرب وقت ممكن
+                  {getSiteText(contact.infoDescription)}
                 </p>
               </div>
 
@@ -82,7 +85,7 @@ const ContactPage: React.FC = () => {
                       الهاتف
                     </h3>
                     <p className="text-text-secondary">
-                      {config.contact.phone}
+                      {content.site.phone}
                     </p>
                   </div>
                 </div>
@@ -96,7 +99,7 @@ const ContactPage: React.FC = () => {
                       البريد الإلكتروني
                     </h3>
                     <p className="text-text-secondary">
-                      {config.contact.email}
+                      {content.site.email}
                     </p>
                   </div>
                 </div>
@@ -141,7 +144,7 @@ const ContactPage: React.FC = () => {
                         rel="noopener noreferrer"
                       >
                         <MessageCircle className="ml-2 h-4 w-4" />
-                        ابدأ المحادثة
+                        {getSiteText(contact.whatsappLabel)}
                       </a>
                     </Button>
                   </div>
@@ -160,7 +163,7 @@ const ContactPage: React.FC = () => {
               <Card>
                 <div className="p-8">
                   <h2 className="text-text-primary mb-6 text-2xl font-bold">
-                    أرسل لنا رسالة
+                      {getSiteText(contact.formTitle)}
                   </h2>
 
                   <form className="space-y-6">
