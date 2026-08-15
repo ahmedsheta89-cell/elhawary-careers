@@ -169,13 +169,13 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
             </p>
             <div className="flex gap-6">
               <Link
-                to="#"
+                to="/privacy"
                 className="text-sm text-neutral-400 transition-colors hover:text-white"
               >
                 {text(content.footer.privacyLabel)}
               </Link>
               <Link
-                to="#"
+                to="/terms"
                 className="text-sm text-neutral-400 transition-colors hover:text-white"
               >
                 {text(content.footer.termsLabel)}

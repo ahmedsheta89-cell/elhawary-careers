@@ -1,0 +1,86 @@
+name: Quality Check and Firebase Deploy
+
+on:
+  push:
+    branches:
+      - launch-readiness
+  pull_request:
+    branches:
+      - launch-readiness
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: firebase-production-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+  VITE_FIREBASE_AUTH_DOMAIN: elhawary-careers-2026.firebaseapp.com
+  VITE_FIREBASE_PROJECT_ID: elhawary-careers-2026
+  VITE_FIREBASE_STORAGE_BUCKET: elhawary-careers-2026.firebasestorage.app
+  VITE_FIREBASE_MESSAGING_SENDER_ID: 727033358903
+  VITE_FIREBASE_APP_ID: 1:727033358903:web:b360849e57776d12332db2
+  VITE_FIREBASE_MEASUREMENT_ID: G-D7K3HGMS7R
+  VITE_DEMO_MODE: false
+  VITE_WHATSAPP_NUMBER: 01000753375
+
+jobs:
+  quality:
+    name: Lint, typecheck, and build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+  deploy:
+    name: Deploy Hosting and Firestore Rules
+    needs: quality
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://elhawary-careers-2026.web.app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Install Firebase CLI
+        run: npm install --global firebase-tools@15.27.0
+
+      - name: Deploy Hosting and Firestore Rules
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: firebase deploy --project elhawary-careers-2026 --only hosting,firestore:rules --non-interactive --token "$FIREBASE_TOKEN"

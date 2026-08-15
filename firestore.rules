@@ -30,12 +30,15 @@ service cloud.firestore {
       allow create: if request.resource.data.keys().hasOnly([
         'jobId', 'fullName', 'birthDate', 'email', 'phone', 'whatsappNumber',
         'address', 'bio', 'education', 'experience', 'privacyConsent',
-        'cvDelivery', 'cvReceived', 'status', 'submittedAt', 'updatedAt'
+        'dedupeKey', 'cvDelivery', 'cvReceived', 'status', 'submittedAt', 'updatedAt'
       ])
       && request.resource.data.status == 'pending'
       && request.resource.data.privacyConsent == true
       && request.resource.data.jobId is string
       && request.resource.data.jobId.size() > 0
+      && request.resource.data.dedupeKey is string
+      && request.resource.data.dedupeKey == applicationId
+      && request.resource.data.dedupeKey.size() == 64
       && exists(/databases/$(database)/documents/jobs/$(request.resource.data.jobId))
       && get(/databases/$(database)/documents/jobs/$(request.resource.data.jobId)).data.isActive == true
       && request.resource.data.fullName is string
@@ -72,6 +75,20 @@ service cloud.firestore {
     match /settings/{settingId} {
       allow read: if settingId in ['public', 'content'];
       allow create, update, delete: if isAdmin();
+    }
+
+    match /auditLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if canReviewApplications()
+        && request.resource.data.keys().hasOnly([
+          'action', 'entity', 'entityId', 'details', 'actorEmail', 'createdAt'
+        ])
+        && request.resource.data.actorEmail == request.auth.token.email
+        && request.resource.data.action is string
+        && request.resource.data.entity is string
+        && request.resource.data.entityId is string
+        && request.resource.data.createdAt is string;
+      allow update, delete: if false;
     }
   }
 }

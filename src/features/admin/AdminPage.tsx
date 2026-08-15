@@ -68,6 +68,34 @@ function formatDate(value: AdminApplication['submittedAt']) {
   return '—';
 }
 
+function csvCell(value: unknown) {
+  return `"${String(value ?? '').replace(/"/g, '""')}"`;
+}
+
+function downloadApplicationsCsv(rows: AdminApplication[], jobs: Job[]) {
+  const header = ['الاسم', 'البريد الإلكتروني', 'الهاتف', 'واتساب', 'الوظيفة', 'الحالة', 'تاريخ التقديم', 'السيرة الذاتية'];
+  const lines = rows.map((application) => {
+    const jobTitle = jobs.find((job) => job.id === application.jobId)?.title.ar ?? application.jobId;
+    return [
+      application.fullName,
+      application.email,
+      application.phone,
+      application.whatsappNumber ?? application.phone,
+      jobTitle,
+      statusLabels[application.status],
+      formatDate(application.submittedAt),
+      application.cvReceived ? 'تم الاستلام' : 'بانتظار الإرسال',
+    ].map(csvCell).join(',');
+  });
+  const blob = new Blob([`\\ufeff${[header.map(csvCell).join(','), ...lines].join('\\n')}`], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = `elhawary-applications-${new Date().toISOString().slice(0, 10)}.csv`;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
 function withoutId(job: Job): JobAdminInput {
   return Object.fromEntries(
     Object.entries(job).filter(([key]) => key !== 'id')
@@ -179,6 +207,9 @@ export function AdminPage() {
   );
   const [contentSaved, setContentSaved] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [applicationSearch, setApplicationSearch] = useState('');
+  const [applicationStatusFilter, setApplicationStatusFilter] = useState<'all' | AdminApplication['status']>('all');
+  const [applicationJobFilter, setApplicationJobFilter] = useState('all');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -630,6 +661,20 @@ export function AdminPage() {
   const pendingApplications = applications.filter(
     (application) => application.status === 'pending'
   ).length;
+  const normalizedApplicationSearch = applicationSearch.trim().toLowerCase();
+  const filteredApplications = applications.filter((application) => {
+    const jobTitle = jobs.find((job) => job.id === application.jobId)?.title.ar ?? application.jobId;
+    const matchesSearch = !normalizedApplicationSearch || [
+      application.fullName,
+      application.email,
+      application.phone,
+      application.whatsappNumber,
+      jobTitle,
+    ].some((value) => value?.toLowerCase().includes(normalizedApplicationSearch));
+    const matchesStatus = applicationStatusFilter === 'all' || application.status === applicationStatusFilter;
+    const matchesJob = applicationJobFilter === 'all' || application.jobId === applicationJobFilter;
+    return matchesSearch && matchesStatus && matchesJob;
+  });
   return (
     <div className="min-h-screen bg-[#f4f8fb] text-slate-900" dir="rtl">
       <header className="relative overflow-hidden bg-slate-950 text-white">
@@ -1364,11 +1409,63 @@ export function AdminPage() {
               </p>
               <h2 className="mt-2 text-2xl font-black">طلبات التوظيف</h2>
             </div>
-            <p className="text-sm text-slate-500">
-              تابع المرشحين وتواصل معهم عبر واتساب
-            </p>
+            <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500">
+              <span>تابع المرشحين وتواصل معهم عبر واتساب</span>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => downloadApplicationsCsv(filteredApplications, jobs)}
+                disabled={filteredApplications.length === 0}
+              >
+                تصدير CSV
+              </Button>
+            </div>
           </div>
-          <div className="overflow-x-auto">
+          <div className="mt-5 grid gap-3 rounded-2xl bg-slate-50 p-4 md:grid-cols-[minmax(0,1.5fr)_minmax(180px,1fr)_minmax(180px,1fr)_auto] md:items-end">
+            <Input
+              label="بحث في الطلبات"
+              value={applicationSearch}
+              onChange={(event) => setApplicationSearch(event.target.value)}
+              placeholder="الاسم، البريد، الهاتف أو الوظيفة"
+            />
+            <FieldSelect
+              label="الحالة"
+              value={applicationStatusFilter}
+              onChange={(value) => setApplicationStatusFilter(value as 'all' | AdminApplication['status'])}
+            >
+              <option value="all">كل الحالات</option>
+              {Object.entries(statusLabels).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </FieldSelect>
+            <FieldSelect
+              label="الوظيفة"
+              value={applicationJobFilter}
+              onChange={setApplicationJobFilter}
+            >
+              <option value="all">كل الوظائف</option>
+              {jobs.map((job) => <option key={job.id} value={job.id}>{job.title.ar}</option>)}
+            </FieldSelect>
+            <div className="flex items-center justify-between gap-3 md:justify-end">
+              <span className="whitespace-nowrap text-xs font-bold text-slate-500">
+                عرض {filteredApplications.length} من {applications.length}
+              </span>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setApplicationSearch('');
+                  setApplicationStatusFilter('all');
+                  setApplicationJobFilter('all');
+                }}
+              >
+                مسح
+              </Button>
+            </div>
+          </div>
+          <div className="mt-5 overflow-x-auto">
             <table className="min-w-full text-right text-sm">
               <thead>
                 <tr className="border-b border-slate-100 text-xs font-black text-slate-400">
@@ -1380,7 +1477,7 @@ export function AdminPage() {
                 </tr>
               </thead>
               <tbody>
-                {applications.map((application) => (
+                {filteredApplications.map((application) => (
                   <tr
                     key={application.id}
                     className="border-b border-slate-50 hover:bg-slate-50"
@@ -1443,16 +1540,16 @@ export function AdminPage() {
                 ))}
               </tbody>
             </table>
-            {applications.length === 0 && (
+            {filteredApplications.length === 0 && (
               <div className="py-12 text-center">
                 <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-slate-100 text-slate-400">
                   <Icon name="users" />
                 </div>
-                <p className="mt-4 font-bold text-slate-600">
-                  لا توجد طلبات حتى الآن
+                  <p className="mt-4 font-bold text-slate-600">
+                  {applications.length === 0 ? 'لا توجد طلبات حتى الآن' : 'لا توجد نتائج مطابقة'}
                 </p>
                 <p className="mt-1 text-sm text-slate-400">
-                  ستظهر طلبات المرشحين هنا بعد التقديم.
+                  {applications.length === 0 ? 'ستظهر طلبات المرشحين هنا بعد التقديم.' : 'جرّب تغيير البحث أو عوامل التصفية.'}
                 </p>
               </div>
             )}

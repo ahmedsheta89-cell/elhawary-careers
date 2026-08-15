@@ -460,8 +460,21 @@ export function ApplyPage() {
                       }
                     />
                     <span>
-                      أوافق على معالجة بياناتي الشخصية لغرض التوظيف وفقاً لسياسة
-                      الخصوصية وشروط الاستخدام.
+                      أوافق على معالجة بياناتي الشخصية لغرض التوظيف وفقاً لـ{' '}
+                      <Link
+                        to="/privacy"
+                        className="text-primary-700 font-semibold underline underline-offset-2"
+                      >
+                        سياسة الخصوصية
+                      </Link>{' '}
+                      و
+                      <Link
+                        to="/terms"
+                        className="text-primary-700 font-semibold underline underline-offset-2"
+                      >
+                        الشروط والأحكام
+                      </Link>
+                      .
                     </span>
                   </label>
                 </motion.div>

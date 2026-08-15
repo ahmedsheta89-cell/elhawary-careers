@@ -8,3 +8,4 @@ export { BenefitsPage } from './benefits/BenefitsPage';
 export { ContactPage } from './contact/ContactPage';
 export { NotFoundPage } from './not-found/NotFoundPage';
 export { AdminPage } from './admin/AdminPage';
+export { PrivacyPage, TermsPage } from './legal/LegalPage';

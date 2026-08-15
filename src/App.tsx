@@ -10,7 +10,9 @@ import {
   HomePage,
   JobDetailsPage,
   NotFoundPage,
+  PrivacyPage,
   SuccessPage,
+  TermsPage,
 } from './features';
 
 function App() {
@@ -26,6 +28,8 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/benefits" element={<BenefitsPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
         <Route path="/404" element={<NotFoundPage />} />
         <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>

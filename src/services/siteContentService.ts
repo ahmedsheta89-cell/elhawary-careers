@@ -87,6 +87,24 @@ export type SiteContent = {
     };
     contact: { eyebrow: SiteText; title: SiteText; description: SiteText; infoTitle: SiteText; infoDescription: SiteText; whatsappLabel: SiteText; formTitle: SiteText; hours: SiteText; address: SiteText };
   };
+  legal: {
+    privacy: {
+      eyebrow: SiteText;
+      title: SiteText;
+      description: SiteText;
+      updatedLabel: SiteText;
+      updatedAt: string;
+      sections: Array<{ title: SiteText; body: SiteText }>;
+    };
+    terms: {
+      eyebrow: SiteText;
+      title: SiteText;
+      description: SiteText;
+      updatedLabel: SiteText;
+      updatedAt: string;
+      sections: Array<{ title: SiteText; body: SiteText }>;
+    };
+  };
   footer: {
     description: SiteText;
     copyright: SiteText;
@@ -230,6 +248,36 @@ export const defaultSiteContent: SiteContent = {
     },
     contact: { eyebrow: text('نحن هنا لمساعدتك'), title: text('تواصل معنا'), description: text('فريق التوظيف جاهز للإجابة عن استفساراتك'), infoTitle: text('معلومات التواصل'), infoDescription: text('يمكنك التواصل معنا عبر أي من القنوات التالية، وسنرد عليك في أقرب وقت ممكن'), whatsappLabel: text('ابدأ المحادثة'), formTitle: text('أرسل لنا رسالة'), hours: text('من السبت إلى الخميس، من 9 صباحاً إلى 5 مساءً'), address: text('جمهورية مصر العربية') },
   },
+  legal: {
+    privacy: {
+      eyebrow: text('حماية بياناتك', 'Your Data Matters'),
+      title: text('سياسة الخصوصية', 'Privacy Policy'),
+      description: text('نوضح هنا كيف نتعامل مع البيانات التي ترسلها عند التقدم إلى وظائف صيدلية الهواري.', 'This page explains how we handle information submitted when you apply for a position at El Hawary Pharmacy.'),
+      updatedLabel: text('آخر تحديث', 'Last updated'),
+      updatedAt: '15 أغسطس 2026',
+      sections: [
+        { title: text('البيانات التي نجمعها', 'Information we collect'), body: text('قد نجمع البيانات التي تكتبها في نموذج التقديم، مثل الاسم وتاريخ الميلاد والبريد الإلكتروني وأرقام الهاتف والعنوان والتعليم والخبرات والنبذة الشخصية. نستخدم هذه البيانات لأغراض التوظيف والتواصل المرتبط بالطلب فقط.', 'We may collect the information you provide in the application form, including your name, birth date, email, phone numbers, address, education, experience, and biography. We use it for recruitment and application-related communication only.') },
+        { title: text('كيفية استخدام البيانات', 'How we use information'), body: text('نستخدم بياناتك لمراجعة مؤهلاتك، والتواصل معك بشأن طلبك، وإدارة مراحل التوظيف، وتحسين تجربة التقديم. لا نبيع بيانات المتقدمين ولا نستخدمها لأغراض تسويقية غير مرتبطة بالتوظيف.', 'We use your information to review your qualifications, contact you about your application, manage recruitment stages, and improve the application experience. We do not sell applicant information or use it for unrelated marketing.') },
+        { title: text('السيرة الذاتية عبر واتساب', 'CV submission through WhatsApp'), body: text('لا يتم رفع السيرة الذاتية داخل الموقع. بعد إرسال الطلب، يمكنك اختيار إرسال السيرة الذاتية إلى رقم واتساب التوظيف الظاهر في الموقع. عند استخدام واتساب، تنطبق أيضاً سياسات وشروط خدمة واتساب.', 'CV files are not uploaded to this website. After submitting an application, you may choose to send your CV to the recruitment WhatsApp number shown on the website. WhatsApp terms and policies also apply when you use that service.') },
+        { title: text('حماية البيانات والاحتفاظ بها', 'Security and retention'), body: text('نطبق ضوابط وصول مناسبة على بيانات طلبات التوظيف، ويقتصر الاطلاع الإداري على المدير والموظفين المصرح لهم. نحتفظ بالبيانات للمدة اللازمة لإدارة فرص التوظيف والالتزامات التشغيلية، ثم نراجع الحاجة إلى الاحتفاظ بها.', 'We apply appropriate access controls to application data, limiting administrative access to the administrator and authorized staff. We retain information for as long as needed to manage recruitment opportunities and operational obligations, then review whether continued retention is necessary.') },
+        { title: text('حقوقك والتواصل معنا', 'Your choices and contact'), body: text('إذا أردت الاستفسار عن بياناتك أو طلب تصحيحها أو حذفها، تواصل مع فريق التوظيف عبر careers@elhawarypharmacy.com أو رقم واتساب المعلن في الموقع، وسنراجع طلبك وفق الإجراءات المعمول بها.', 'To ask about, correct, or request deletion of your information, contact the recruitment team at careers@elhawarypharmacy.com or the WhatsApp number shown on the website. We will review your request under our applicable procedures.') },
+      ],
+    },
+    terms: {
+      eyebrow: text('استخدام المنصة', 'Using the platform'),
+      title: text('الشروط والأحكام', 'Terms and Conditions'),
+      description: text('تنظم هذه الشروط استخدام منصة التوظيف وإرسال طلبات العمل إلى صيدلية الهواري.', 'These terms govern the use of the recruitment platform and the submission of applications to El Hawary Pharmacy.'),
+      updatedLabel: text('آخر تحديث', 'Last updated'),
+      updatedAt: '15 أغسطس 2026',
+      sections: [
+        { title: text('الغرض من المنصة', 'Platform purpose'), body: text('توفر المنصة معلومات عن الوظائف المتاحة وتتيح للمرشحين إرسال بياناتهم للتقييم الوظيفي. نشر الوظيفة لا يمثل ضماناً بالتعيين أو وعداً بإجراء مقابلة.', 'The platform provides information about available positions and allows candidates to submit information for recruitment review. Publishing a position does not guarantee employment or an interview.') },
+        { title: text('دقة المعلومات', 'Accuracy of information'), body: text('يتحمل المتقدم مسؤولية تقديم بيانات صحيحة ومحدثة وكاملة. يجب عدم إرسال بيانات تخص شخصاً آخر أو مستندات غير صحيحة أو مضللة.', 'Applicants are responsible for providing accurate, current, and complete information. Do not submit information belonging to another person or false or misleading documents.') },
+        { title: text('إرسال الطلبات', 'Application submissions'), body: text('إرسال الطلب لا يعني القبول النهائي. يحتفظ فريق التوظيف بحق مراجعة الطلبات والتواصل مع المرشحين المناسبين وتحديث حالة الطلب وفق احتياجات العمل.', 'Submitting an application does not mean final acceptance. The recruitment team may review applications, contact suitable candidates, and update application status according to business needs.') },
+        { title: text('السلوك المقبول', 'Acceptable use'), body: text('يُمنع استخدام المنصة لإرسال محتوى مسيء أو ضار أو مخالف للقانون، أو لمحاولة تعطيل الموقع أو الوصول غير المصرح به إلى بياناته أو خدماته.', 'You may not use the platform to submit abusive, harmful, or unlawful content, disrupt the website, or attempt unauthorized access to its data or services.') },
+        { title: text('التعديلات والتواصل', 'Updates and contact'), body: text('قد يتم تحديث الوظائف أو المحتوى أو هذه الشروط عند الحاجة. استمرارك في استخدام المنصة بعد نشر التحديثات يعني اطلاعك عليها. للاستفسارات، تواصل مع careers@elhawarypharmacy.com.', 'Jobs, content, or these terms may be updated when necessary. Continued use after an update indicates that you have reviewed it. For questions, contact careers@elhawarypharmacy.com.') },
+      ],
+    },
+  },
   footer: {
     description: text('نبني فريقاً متميزاً لخدمة مجتمعنا وتطوير الرعاية الصحية.'),
     copyright: text('جميع الحقوق محفوظة لصيدلية الهواري'),
@@ -261,6 +309,12 @@ function mergeContent(value: Partial<SiteContent> | undefined): SiteContent {
       about: { ...defaultSiteContent.pages.about, ...value?.pages?.about },
       benefits: { ...defaultSiteContent.pages.benefits, ...value?.pages?.benefits },
       contact: { ...defaultSiteContent.pages.contact, ...value?.pages?.contact },
+    },
+    legal: {
+      ...defaultSiteContent.legal,
+      ...value?.legal,
+      privacy: { ...defaultSiteContent.legal.privacy, ...value?.legal?.privacy },
+      terms: { ...defaultSiteContent.legal.terms, ...value?.legal?.terms },
     },
     footer: { ...defaultSiteContent.footer, ...value?.footer },
     theme: { ...defaultSiteContent.theme, ...value?.theme },

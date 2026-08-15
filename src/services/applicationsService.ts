@@ -1,4 +1,4 @@
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { z } from 'zod';
 import {
   getFirebaseInstances,
@@ -8,28 +8,28 @@ import {
 
 const applicationSchema = z.object({
   jobId: z.string().min(1),
-  fullName: z.string().trim().min(2, 'الاسم مطلوب'),
+  fullName: z.string().trim().min(2, 'الاسم مطلوب').max(120, 'الاسم طويل جداً'),
   birthDate: z.string().min(1, 'تاريخ الميلاد مطلوب'),
-  email: z.string().email('البريد الإلكتروني غير صحيح'),
-  phone: z.string().trim().min(8, 'رقم الهاتف غير صحيح'),
-  whatsappNumber: z.string().trim().min(8, 'رقم واتساب غير صحيح'),
-  address: z.string().trim().min(2, 'العنوان مطلوب'),
-  bio: z.string().trim().optional(),
+  email: z.string().trim().email('البريد الإلكتروني غير صحيح').max(254, 'البريد الإلكتروني طويل جداً').transform((value) => value.toLowerCase()),
+  phone: z.string().trim().min(8, 'رقم الهاتف غير صحيح').max(30, 'رقم الهاتف طويل جداً'),
+  whatsappNumber: z.string().trim().min(8, 'رقم واتساب غير صحيح').max(30, 'رقم واتساب طويل جداً'),
+  address: z.string().trim().min(2, 'العنوان مطلوب').max(300, 'العنوان طويل جداً'),
+  bio: z.string().trim().max(2000, 'النبذة طويلة جداً').optional(),
   education: z.object({
-    degree: z.string().trim().min(2, 'المؤهل مطلوب'),
-    institution: z.string().trim().min(2, 'الجامعة أو المعهد مطلوب'),
+    degree: z.string().trim().min(2, 'المؤهل مطلوب').max(160, 'المؤهل طويل جداً'),
+    institution: z.string().trim().min(2, 'الجامعة أو المعهد مطلوب').max(200, 'اسم الجامعة طويل جداً'),
     graduationYear: z.coerce
       .number()
       .min(1900)
       .max(new Date().getFullYear() + 5),
-    grade: z.string().trim().optional(),
+    grade: z.string().trim().max(80, 'التقدير طويل جداً').optional(),
   }),
   experience: z.object({
-    company: z.string().trim().min(2, 'اسم الشركة مطلوب'),
-    position: z.string().trim().min(2, 'المسمى الوظيفي مطلوب'),
+    company: z.string().trim().min(2, 'اسم الشركة مطلوب').max(160, 'اسم الشركة طويل جداً'),
+    position: z.string().trim().min(2, 'المسمى الوظيفي مطلوب').max(160, 'المسمى الوظيفي طويل جداً'),
     startDate: z.string().min(1, 'تاريخ البدء مطلوب'),
     endDate: z.string().optional(),
-    description: z.string().trim().optional(),
+    description: z.string().trim().max(2000, 'وصف الخبرة طويل جداً').optional(),
   }),
   privacyConsent: z.literal(true, {
     errorMap: () => ({ message: 'يجب الموافقة على سياسة الخصوصية.' }),
@@ -61,11 +61,21 @@ export interface CreateApplicationInput {
   privacyConsent: boolean;
 }
 
+async function createDeduplicationKey(jobId: string, email: string) {
+  const source = `${jobId.trim().toLowerCase()}:${email.trim().toLowerCase()}`;
+  const encoded = new TextEncoder().encode(source);
+  const digest = await crypto.subtle.digest('SHA-256', encoded);
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 class ApplicationsService {
   async createApplication(
     input: CreateApplicationInput
   ): Promise<{ id: string; reference: string }> {
     const validated = applicationSchema.parse(input);
+    const dedupeKey = await createDeduplicationKey(validated.jobId, validated.email);
 
     if (!hasFirebaseConfig()) {
       if (!isDemoMode()) {
@@ -79,6 +89,7 @@ class ApplicationsService {
       );
       localApplications.push({
         ...validated,
+        dedupeKey,
         id,
         reference,
         status: 'pending',
@@ -94,14 +105,24 @@ class ApplicationsService {
     }
 
     const { db } = getFirebaseInstances();
-    const applicationRef = await addDoc(collection(db, 'applications'), {
-      ...validated,
-      status: 'pending',
-      cvDelivery: 'whatsapp',
-      cvReceived: false,
-      submittedAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
+    const applicationRef = doc(collection(db, 'applications'), dedupeKey);
+
+    try {
+      await setDoc(applicationRef, {
+        ...validated,
+        dedupeKey,
+        status: 'pending',
+        cvDelivery: 'whatsapp',
+        cvReceived: false,
+        submittedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+    } catch (error) {
+      if (error instanceof Error && 'code' in error && error.code === 'already-exists') {
+        throw new Error('يوجد طلب مسجل بهذا البريد الإلكتروني لهذه الوظيفة بالفعل.');
+      }
+      throw error;
+    }
 
     return {
       id: applicationRef.id,

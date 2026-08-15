@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /apply/
+
+Sitemap: https://elhawary-careers-2026.web.app/sitemap.xml

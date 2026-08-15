@@ -74,6 +74,30 @@ class AdminService {
     return sendPasswordResetEmail(auth, email);
   }
 
+  private async writeAuditLog(
+    action: string,
+    entity: string,
+    entityId: string,
+    details: Record<string, unknown> = {}
+  ) {
+    try {
+      const { db, auth } = requireFirebase();
+      const user = auth.currentUser;
+      if (!user) return;
+      const logId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      await setDoc(doc(db, 'auditLogs', logId), {
+        action,
+        entity,
+        entityId,
+        details,
+        actorEmail: user.email ?? '',
+        createdAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('Unable to write audit log', error);
+    }
+  }
+
   async getStaffRole(email: string): Promise<StaffRole | null> {
     const { db } = requireFirebase();
     const normalizedEmail = email.trim().toLowerCase();
@@ -104,6 +128,7 @@ class AdminService {
       updatedAt: new Date().toISOString(),
     };
     await setDoc(doc(db, 'staffRoles', normalizedEmail), member);
+    await this.writeAuditLog('grant_hr_role', 'staffRole', normalizedEmail);
     return member;
   }
 
@@ -111,6 +136,7 @@ class AdminService {
     const { db } = requireFirebase();
     const normalizedEmail = email.trim().toLowerCase();
     await deleteDoc(doc(db, 'staffRoles', normalizedEmail));
+    await this.writeAuditLog('revoke_hr_role', 'staffRole', normalizedEmail);
   }
 
   async getApplications(): Promise<AdminApplication[]> {
@@ -134,6 +160,7 @@ class AdminService {
       status,
       updatedAt: new Date().toISOString(),
     });
+    await this.writeAuditLog('update_application_status', 'application', id, { status });
   }
 
   async getSiteSettings(): Promise<SiteSettings> {
@@ -167,6 +194,7 @@ class AdminService {
       updatedAt: new Date().toISOString(),
     };
     await setDoc(doc(db, 'settings', 'public'), settings, { merge: true });
+    await this.writeAuditLog('update_whatsapp_number', 'settings', 'public');
     return settings;
   }
 }
