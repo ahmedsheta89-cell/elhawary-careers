@@ -36,6 +36,7 @@ const statusLabels: Record<AdminApplication['status'], string> = {
 };
 
 type AccessRole = 'admin' | 'hr' | 'denied';
+type AdminTab = 'overview' | 'jobs' | 'applications' | 'content' | 'team';
 
 const statusStyles: Record<AdminApplication['status'], string> = {
   pending: 'bg-amber-50 text-amber-700 ring-amber-200',
@@ -228,6 +229,7 @@ export function AdminPage() {
     typeof Notification !== 'undefined' && Notification.permission === 'granted'
   );
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<AdminTab>('overview');
 
   useEffect(() => {
     if (!hasFirebaseConfig()) {
@@ -265,6 +267,7 @@ export function AdminPage() {
         }
         const nextRole: AccessRole = isAdmin ? 'admin' : 'hr';
         setRole(nextRole);
+        setActiveTab(nextRole === 'admin' ? 'overview' : 'applications');
         const loadedApplications = await adminService.getApplications();
         setApplications(loadedApplications);
         if (nextRole === 'admin') {
@@ -897,11 +900,51 @@ export function AdminPage() {
           ))}
         </section>
 
-        {role === 'admin' && (
+        {role && (
+          <nav
+            aria-label="أقسام لوحة الإدارة"
+            className="sticky top-3 z-20 rounded-2xl border border-slate-200 bg-white/95 p-2 shadow-lg shadow-slate-200/50 backdrop-blur"
+          >
+            <div className="flex gap-2 overflow-x-auto" role="tablist">
+              {(role === 'admin'
+                ? [
+                    ['overview', 'نظرة عامة'],
+                    ['jobs', 'الوظائف'],
+                    ['applications', 'الطلبات'],
+                    ['content', 'المحتوى والمظهر'],
+                    ['team', 'فريق HR'],
+                  ]
+                : [['applications', 'الطلبات']]
+              ).map(([tab, label]) => (
+                <button
+                  key={tab}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === tab}
+                  onClick={() => setActiveTab(tab as AdminTab)}
+                  className={`min-w-max rounded-xl px-4 py-3 text-sm font-bold transition ${
+                    activeTab === tab
+                      ? 'bg-slate-950 text-white shadow-md'
+                      : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
+                >
+                  {label}
+                  {tab === 'applications' && pendingApplications > 0 && (
+                    <span className={`mr-2 rounded-full px-2 py-0.5 text-[11px] ${activeTab === tab ? 'bg-white/15 text-white' : 'bg-amber-100 text-amber-700'}`}>
+                      {pendingApplications}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </nav>
+        )}
+
+        {role === 'admin' && (activeTab === 'jobs' || activeTab === 'content') && (
           <section className="grid gap-7 xl:grid-cols-[1.15fr_.85fr]">
           <Card
             padding="none"
-            className="border-0 shadow-[0_18px_60px_rgba(15,23,42,.08)]"
+            className={`${activeTab === 'content' ? 'hidden ' : ''}border-0 shadow-[0_18px_60px_rgba(15,23,42,.08)]`}
           >
             <div className="border-b border-slate-100 bg-gradient-to-l from-sky-50 to-white px-6 py-6 sm:px-8">
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -1156,7 +1199,7 @@ export function AdminPage() {
           </Card>
 
           <div className="space-y-7">
-            <div className="rounded-3xl bg-gradient-to-br from-sky-600 to-cyan-700 p-7 text-white shadow-xl shadow-sky-200">
+            <div className={`${activeTab === 'content' ? 'hidden ' : ''}rounded-3xl bg-gradient-to-br from-sky-600 to-cyan-700 p-7 text-white shadow-xl shadow-sky-200`}>
               <p className="text-sm font-bold text-cyan-100">إرشاد سريع</p>
               <h3 className="mt-3 text-2xl font-black leading-tight">
                 إعلان واضح = مرشح أفضل
@@ -1172,7 +1215,7 @@ export function AdminPage() {
                 <span>راجع الإعلانات النشطة أسبوعياً</span>
               </div>
             </div>
-            <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
+            <div className={`${activeTab === 'content' ? 'hidden ' : ''}rounded-3xl border border-slate-200 bg-white p-7 shadow-sm`}>
               <p className="text-xs font-black uppercase tracking-[.16em] text-slate-400">
                 ملخص النشر
               </p>
@@ -1202,7 +1245,7 @@ export function AdminPage() {
 
             <form
               onSubmit={(event) => void saveWhatsAppSettings(event)}
-              className="rounded-3xl border border-emerald-100 bg-emerald-50/70 p-7 shadow-sm"
+              className={`${activeTab === 'content' ? 'hidden ' : ''}rounded-3xl border border-emerald-100 bg-emerald-50/70 p-7 shadow-sm`}
             >
               <div className="flex items-start gap-3">
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-emerald-600 text-white">
@@ -1256,7 +1299,7 @@ export function AdminPage() {
               </div>
             </form>
 
-            <PageContentEditor
+            {activeTab === 'content' && <PageContentEditor
               value={siteContent}
               onChange={(next) => {
                 setSiteContent(next);
@@ -1267,11 +1310,11 @@ export function AdminPage() {
               onReset={resetSiteContentEditor}
               saving={isSubmitting}
               saved={contentSaved}
-            />
+            />}
 
             <form
               onSubmit={(event) => void saveSiteContentSettings(event)}
-              className="rounded-3xl border border-violet-100 bg-violet-50/60 p-7 shadow-sm"
+              className={`${activeTab === 'content' ? '' : 'hidden '}rounded-3xl border border-violet-100 bg-violet-50/60 p-7 shadow-sm`}
             >
               <div className="flex items-start gap-3">
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-violet-600 text-white">
@@ -1339,7 +1382,7 @@ export function AdminPage() {
           </section>
         )}
 
-        {role === 'admin' && (
+        {role === 'admin' && activeTab === 'team' && (
           <section className="rounded-3xl border border-indigo-100 bg-indigo-50/50 p-5 shadow-sm sm:p-7">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
@@ -1431,7 +1474,7 @@ export function AdminPage() {
           </section>
         )}
 
-        {role === 'admin' && (
+        {role === 'admin' && activeTab === 'jobs' && (
           <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
             <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
               <div>
@@ -1523,6 +1566,7 @@ export function AdminPage() {
           </section>
         )}
 
+        {activeTab === 'applications' && (
         <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
           <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
             <div>
@@ -1698,6 +1742,7 @@ export function AdminPage() {
             )}
           </div>
         </section>
+        )}
       </main>
     </div>
   );
