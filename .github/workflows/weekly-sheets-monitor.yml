@@ -23,7 +23,7 @@ jobs:
       name: sheets-monitoring
     env:
       ELHAWARY_SPREADSHEET_ID: ${{ vars.ELHAWARY_SPREADSHEET_ID || '1xiU35KLjJg2r9dOUwaEV28SWFft8937cIjLDhWjxNt4' }}
-      ELHAWARY_APPLICATIONS_SHEET: ${{ vars.ELHAWARY_APPLICATIONSHEET || 'Applications' }}
+      ELHAWARY_APPLICATIONS_SHEET: ${{ vars.ELHAWARY_APPLICATIONS_SHEET || 'Applications' }}
       ELHAWARY_QA_SHEET: ${{ vars.ELHAWARY_QA_SHEET || 'QA_Batch_Test' }}
       FIREBASE_PROJECT_ID: elhawary-careers-2026
       GOOGLE_SHEETS_SPREADSHEET_ID: ${{ vars.ELHAWARY_SPREADSHEET_ID || '1xiU35KLjJg2r9dOUwaEV28SWFft8937cIjLDhWjxNt4' }}
@@ -48,6 +48,7 @@ jobs:
           project_id: ${{ vars.GCP_PROJECT_ID }}
           workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          audience: https://github.com/ahmedsheta89-cell
           create_credentials_file: true
           export_environment_variables: true
 
