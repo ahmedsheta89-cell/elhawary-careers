@@ -27,6 +27,20 @@ function toDateString(value: unknown): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+function removeUndefinedDeep(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(removeUndefinedDeep);
+  }
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value)
+        .filter(([, nestedValue]) => nestedValue !== undefined)
+        .map(([key, nestedValue]) => [key, removeUndefinedDeep(nestedValue)])
+    );
+  }
+  return value;
+}
+
 function mapJob(id: string, data: DocumentData): Job {
   const raw = data as Partial<Job> & Record<string, unknown>;
   return {
@@ -88,12 +102,15 @@ class JobsService {
     if (!hasFirebaseConfig())
       throw new Error('أكمل إعداد Firebase قبل إدارة الوظائف.');
     const { db } = getFirebaseInstances();
-    const payload = {
+    const rawPayload = {
       ...input,
       postedDate: input.postedDate || new Date().toISOString().slice(0, 10),
       applicationCount: input.applicationCount ?? 0,
       updatedAt: new Date().toISOString(),
     };
+    // Firestore يرفض القيم undefined؛ تظهر خصوصاً عند تعديل وظيفة قديمة
+    // لا تحتوي على salaryRange. نزيل الحقول غير المعرفة قبل الكتابة.
+    const payload = removeUndefinedDeep(rawPayload) as Record<string, unknown>;
     if (id) {
       await setDoc(doc(db, 'jobs', id), payload, { merge: true });
       return id;

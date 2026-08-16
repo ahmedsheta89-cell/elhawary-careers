@@ -16,6 +16,13 @@ import {
 } from '@/services/mockData';
 import { MapPin, Briefcase, Clock, Users, CheckCircle } from 'lucide-react';
 
+const EDUCATION_LABELS: Record<string, { ar: string; en: string }> = {
+  high_school: { ar: 'الثانوية العامة', en: 'High School' },
+  diploma: { ar: 'دبلوم', en: 'Diploma' },
+  bachelor: { ar: 'بكالوريوس', en: "Bachelor's Degree" },
+  master: { ar: 'ماجستير', en: "Master's Degree" },
+  phd: { ar: 'دكتوراه', en: 'PhD' },
+};
 const JobDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -192,7 +199,10 @@ const JobDetailsPage: React.FC = () => {
                         <span className="text-text-secondary">
                           المؤهل المطلوب
                         </span>
-                        <Badge variant="neutral">بكالوريوس</Badge>
+                        <Badge variant="neutral">
+                          {EDUCATION_LABELS[job.educationLevel]?.ar ||
+                            job.educationLevel}
+                        </Badge>
                       </div>
                       {job.salaryRange && (
                         <div className="flex items-center justify-between border-t pt-4">

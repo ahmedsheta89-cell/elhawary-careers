@@ -76,3 +76,32 @@ Run #3 proved the pipeline build is fully fixed. Steps with `success`: checkout 
 
 Conclusion: GitHub Actions monitoring pipeline is operationally complete pending a single one-time user step in Google Cloud Console (Workload Identity Federation pool + provider + workload identity) per `GITHUB_ACTIONS_SHEETS_SETUP_AR.md` — no secrets required anywhere.
 ## Saved FINAL_GITHUB_ACTIONS_STEPS_AR.md (one-time user WIF guide)
+
+## WIF setup attempt (2026-08-16 ~05:00 UTC)
+
+Google Cloud Console login wall in user's browser: accounts.google.com/v3/signin requests email + CAPTCHA (no saved session). The gws OAuth token scopes are limited to Drive/Sheets/Docs/Forms/Slides/email — no IAM/Cloud Resource Manager scopes, so IAM Service Accounts and Workload Identity Federation cannot be created programmatically through the current credential. gcloud CLI is not installed/authorized. Conclusion: the one-time WIF setup requires either (a) user takeover of the browser to sign into Cloud Console, or (b) user performing Console steps manually. Documented in FINAL_GITHUB_ACTIONS_STEPS_AR.md already delivered.
+
+## My Browser state (2026-08-16 ~05:05 UTC)
+
+My Browser extension returns HTTP 504 "did not respond in time" — likely the user's local machine is offline/sleeping. Previously Cloud Console showed accounts.google.com/v3/signin with email field + CAPTCHA (no saved Google session in the user's browser for Cloud Console). Options: ask user to (1) wake/connect their machine, or (2) perform the one-time WIF steps manually per FINAL_GITHUB_ACTIONS_STEPS_AR.md. The WIF setup cannot proceed without a signed-in Cloud Console session, and gws OAuth lacks IAM scopes.
+
+## WIF final status (2026-08-16 ~05:15 UTC)
+
+Programmatic check of IAM / Cloud Resource Manager / Workload Identity Federation REST surfaces using the available Google OAuth token returned HTTP 403 for all three — token lacks IAM/CRM scopes. My Browser extension again returned HTTP 504 (user machine not responding). Cloud Console in user browser shows accounts.google.com sign-in wall with CAPTCHA, no saved session. Confirmed: the one-time WIF setup is the only remaining item and it is gated behind either user browser takeover for login or manual Console steps. Everything else (workflows, dispatcher, scripts, docs, Firebase deploy pipeline, Sheets OAuth, batch test) is complete and verified live.
+
+## Final delivery state (2026-08-16 ~09:30 UTC)
+
+A manual run of Sheets Monitor Dispatcher executed at 2026-08-16T09:28Z (run id 31939119456) and completed with failure — expected until WIF variables exist in environment `sheets-monitoring`. The Quality Check and Firebase Deploy pipeline on launch-readiness remains healthy (last success 31927862452, latest commit 5975ea8). All three verification methods exhausted: (1) My Browser shows Cloud Console sign-in wall with CAPTCHA / extension intermittently 504; (2) gws OAuth token has no IAM/CRM scopes (HTTP 403 on all three REST checks); (3) gcloud CLI unavailable. The one remaining item is the one-time user-side WIF setup fully documented in FINAL_GITHUB_ACTIONS_STEPS_AR.md: sheets-ci service account + WIF pool/provider (issuer https://token.actions.githubusercontent.com, audience https://github.com/ahmedsheta89-cell) + Sheets share with sheets-ci@elhawary-careers-2026.iam.gserviceaccount.com as Editor + 3 environment variables (GCP_PROJECT_ID, GCP_WORKLOAD_IDENTITY_PROVIDER, GCP_SERVICE_ACCOUNT) in GitHub environment sheets-monitoring. Spreadsheet ID 1xiU35KLjJg2r9dOUwaEV28SWFft8937cIjLDhWjxNt4.
+
+## User screenshot state (2026-08-16 ~10:10 local, user time ~13:10)
+
+User pasted a screenshot from THEIR local Windows machine showing Cloud Console at console.cloud.google.com/iam-admin/serviceaccounts/create?project=elhawary-careers-2026 — the "Create service account" form is OPEN with empty Service account name / Service account ID / description fields, and the session IS signed in ("Now viewing project elhawary-careers-2026 in organization ahmedsheta89-org", IAM & Admin > Service accounts visible in left nav). HOWEVER, My Browser (the connected extension) returns HTTP 504 "extension did not respond in time" AND navigation via my browser tools lands on the accounts.google.com sign-in wall (not the user's session). Conclusion: the signed-in Cloud Console session exists only in the user's local Chrome window shown in the screenshot; it is NOT the same browser session my tools control (My Browser extension cannot reach that window, likely extension disconnected or pointing at different profile). I must guide the user step-by-step through the open form via explicit input values rather than clicking in their window.
+
+Values to instruct user to enter on the open form:
+1. Service account name: sheets-ci
+2. Service account ID: sheets-ci (email becomes sheets-ci@elhawary-careers-2026.iam.gserviceaccount.com)
+3. Skip role assignment (no roles) — click Done/Close
+4. Then Workload Identity Federation > Create Pool github-actions-pool > Provider github-provider (OIDC), issuer https://token.actions.githubusercontent.com, audience https://github.com/ahmedsheta89-cell, attribute condition attribute.repository == 'ahmedsheta89-cell/elhawary-careers'
+5. Grant Workload Identity Token Creator to sheets-ci (optional for impersonation-less WIF — actually not needed; skip)
+6. Share Sheets file 1xiU35KLjJg2r9dOUwaEV28SWFft8937cIjLDhWjxNt4 with sheets-ci@elhawary-careers-2026.iam.gserviceaccount.com as Editor
+7. Get project number from Console home (e.g. via project picker) and set GitHub environment variables under environment sheets-monitoring: GCP_PROJECT_ID=elhawary-careers-2026, GCP_WORKLOAD_IDENTITY_PROVIDER=projects/<PROJECT_NUMBER>/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider, GCP_SERVICE_ACCOUNT=sheets-ci@elhawary-careers-2026.iam.gserviceaccount.com
