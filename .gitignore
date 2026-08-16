@@ -61,3 +61,7 @@ coverage.xml
 # Firebase local state
 .firebase/
 .firebaserc
+
+# Local monitoring outputs
+weekly-sync-monitor-results.json
+logs/
