@@ -299,7 +299,9 @@ export function AdminPage() {
           setContentJson(JSON.stringify(loadedContent, null, 2));
           setGoogleSheetsSettings(loadedGoogleSheets);
         } else {
-          setJobs([]);
+          // HR يحتاج عناوين الوظائف النشطة لعرض الطلبات والفلاتر فقط.
+          // لا نستخدم getAllJobs هنا لأن قواعد Firestore تمنع قراءة الوظائف غير المنشورة.
+          setJobs(await jobsService.getActiveJobs());
           setStaffMembers([]);
         }
       } catch (loadError) {
