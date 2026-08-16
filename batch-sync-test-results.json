@@ -1,0 +1,36 @@
+{
+  "projectId": "elhawary-careers-2026",
+  "spreadsheetId": "1xiU35KLjJg2r9dOUwaEV28SWFft8937cIjLDhWjxNt4",
+  "sheetName": "QA_Batch_Test",
+  "qaApplicationIds": [
+    "qa-batch-001",
+    "qa-batch-002",
+    "qa-batch-003",
+    "qa-batch-004"
+  ],
+  "firstSync": {
+    "inserted": 4,
+    "updated": 0
+  },
+  "secondSync": {
+    "inserted": 0,
+    "updated": 4
+  },
+  "qaRowCounts": {
+    "qa-batch-001": 1,
+    "qa-batch-002": 1,
+    "qa-batch-003": 1,
+    "qa-batch-004": 1
+  },
+  "duplicateOrMissingIds": {},
+  "passed": true,
+  "firestoreInjection": {
+    "attempted": true,
+    "status": "skipped_due_to_authentication",
+    "createdOrUpdated": 0,
+    "reason": "Firestore 401: {"
+  },
+  "testScope": "sheets_layer_only",
+  "executedAt": "2026-08-16T04:12:23Z",
+  "notes": "اختبار معزول في تبويب QA_Batch_Test؛ لا يحذف أي بيانات، وإعادة التشغيل تحدّث الصفوف نفسها. عند رفض اعتماد Firebase CLI يظل اختبار منع التكرار في Sheets قائماً، ويُسجّل ذلك دون ادعاء حقن بيانات Firestore."
+}

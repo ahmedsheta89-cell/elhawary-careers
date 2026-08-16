@@ -23,3 +23,15 @@
 
 ## الحالة النهائية بعد إنشاء OAuth Web Client
 تم إنشاء OAuth Web Client من نوع Web application للمشروع الإنتاجي، مع إضافة أصل الموقع `https://elhawary-careers-2026.web.app`. تم حفظ Client ID في `settings/googleSheets` مع إبقاء Client Secret خارج المشروع وFirestore وGitHub. ملف Sheets وتبويب Applications جاهزان، ونتيجة المزامنة الفعلية السابقة ما زالت صفاً واحداً فريداً بلا تكرار. الاختبار الوحيد غير المؤكد آلياً هو ضغط زر المزامنة من جلسة المدير في واجهة الويب، لأن التبويب المتصل بالأتمتة لا يعرض جلسة المدير المفتوحة في نافذة Chrome الشخصية.
+
+## 16 أغسطس 2026 — اختبار دفعي وتقييم Background Sync
+
+- أُنشئ تبويب QA معزول باسم `QA_Batch_Test` داخل ملف `El Hawary Careers Applications`.
+- نُفذت أربع هويات اختبار حتمية: `qa-batch-001` إلى `qa-batch-004`.
+- الجولة الأولى: `inserted=4`, `updated=0`.
+- الجولة الثانية: `inserted=0`, `updated=4`.
+- تحقق القراءة المباشرة من `QA_Batch_Test!A1:O5` من وجود كل معرّف مرة واحدة فقط، وبقاء المخطط 15 عموداً.
+- حاول السكربت إنشاء/تحديث طلبات QA في Firestore، لكن Firebase CLI access token المحلي رُفض من Firestore بـ HTTP 401؛ لذلك سُجل النطاق بوضوح كـ `sheets_layer_only` ولم تُعتبر بيانات Sheets بيانات طلبات إنتاجية.
+- أُضيف `scripts/batch_sync_test.py` وتقريرا `batch-sync-test-results.json` و`batch-sync-test-report-ar.md`.
+- التوصية التشغيلية: الإبقاء على المزامنة اليدوية المجانية؛ عدم تفعيل مزامنة خلفية فورية دون طبقة خادم ومتطلبات فوترة واضحة.
+- تم تحديث مهارة التشغيل `elhawary-careers-operations` والتحقق منها بنجاح عبر `quick_validate.py`.
