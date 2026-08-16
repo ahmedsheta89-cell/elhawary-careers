@@ -12,6 +12,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from sheets_client import sheets_call
+
 SPREADSHEET_ID = os.getenv(
     "ELHAWARY_SPREADSHEET_ID", "1xiU35KLjJg2r9dOUwaEV28SWFft8937cIjLDhWjxNt4"
 )
@@ -39,27 +41,17 @@ EXPECTED_QA_IDS = [f"qa-batch-{number:03d}" for number in range(1, 5)]
 
 def gws_values(range_name: str) -> tuple[list[list[str]], float]:
     started = time.perf_counter()
-    command = [
-        "gws",
-        "sheets",
-        "spreadsheets",
-        "values",
-        "get",
-        "--params",
-        json.dumps({"spreadsheetId": SPREADSHEET_ID, "range": range_name}, ensure_ascii=False),
-        "--format",
-        "json",
-    ]
-    completed = subprocess.run(command, capture_output=True, text=True, check=False)
+    payload = sheets_call(
+        [
+            "sheets",
+            "spreadsheets",
+            "values",
+            "get",
+            "--params",
+            json.dumps({"spreadsheetId": SPREADSHEET_ID, "range": range_name}, ensure_ascii=False),
+        ]
+    )
     elapsed_ms = round((time.perf_counter() - started) * 1000, 2)
-    if completed.returncode != 0:
-        raise RuntimeError(
-            f"gws failed for {range_name}: {completed.stderr.strip() or completed.stdout.strip()}"
-        )
-    try:
-        payload = json.loads(completed.stdout)
-    except json.JSONDecodeError as error:
-        raise RuntimeError(f"gws returned invalid JSON for {range_name}") from error
     return payload.get("values", []), elapsed_ms
 
 

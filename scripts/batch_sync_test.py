@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import json
 import os
-import subprocess
 import sys
 from collections import Counter
 from datetime import datetime, timezone
@@ -17,6 +16,8 @@ from pathlib import Path
 from typing import Any
 
 import requests
+
+from sheets_client import sheets_call
 
 PROJECT_ID = os.environ.get("FIREBASE_PROJECT_ID", "elhawary-careers-2026")
 SPREADSHEET_ID = os.environ.get(
@@ -147,16 +148,7 @@ def create_or_update_firestore_application(application: dict[str, str], access_t
 
 
 def gws(service_args: list[str], *, body: dict[str, Any] | None = None) -> dict[str, Any]:
-    command = ["gws", *service_args, "--format", "json"]
-    if body is not None:
-        command.extend(["--json", json.dumps(body, ensure_ascii=False)])
-    result = subprocess.run(command, check=False, capture_output=True, text=True)
-    if result.returncode != 0:
-        raise RuntimeError(f"gws فشل: {result.stderr.strip() or result.stdout.strip()}")
-    try:
-        return json.loads(result.stdout)
-    except json.JSONDecodeError as exc:
-        raise RuntimeError(f"استجابة gws ليست JSON: {result.stdout[:500]}") from exc
+    return sheets_call(service_args, body=body)
 
 
 def ensure_test_tab() -> None:
