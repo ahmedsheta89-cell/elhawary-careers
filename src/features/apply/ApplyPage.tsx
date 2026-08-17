@@ -152,23 +152,23 @@ export function ApplyPage() {
   }
 
   return (
-    <div className="bg-background-alternate min-h-screen py-12" dir="rtl">
+    <div className="bg-background-alternate min-h-screen py-8 sm:py-12" dir="rtl">
       <div className="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
+        <div className="mb-8 rounded-3xl border border-slate-200/80 bg-white/70 p-5 shadow-sm sm:p-7">
           <Link
             to={`/jobs/${id}`}
             className="text-text-secondary hover:text-text-primary mb-4 inline-flex items-center gap-2"
           >
             العودة للتفاصيل
           </Link>
-          <h1 className="text-text-primary mb-2 text-3xl font-bold">
+          <h1 className="text-text-primary mb-2 text-3xl font-black tracking-tight">
             التقدم للوظيفة
           </h1>
           <p className="text-text-secondary">{job.title.ar}</p>
         </div>
 
-        <Card className="mb-8">
-          <div className="p-6">
+        <Card className="mb-8 overflow-hidden border-slate-200/80 shadow-[0_14px_35px_rgba(15,23,42,0.06)]">
+          <div className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               {steps.map((step, index) => (
                 <div key={step.number} className="flex flex-1 items-center">
@@ -197,8 +197,8 @@ export function ApplyPage() {
           </div>
         </Card>
 
-        <Card>
-          <div className="p-8">
+        <Card className="overflow-hidden border-slate-200/80 shadow-[0_14px_35px_rgba(15,23,42,0.06)]">
+          <div className="p-5 sm:p-8">
             <AnimatePresence mode="wait">
               {currentStep === 1 && (
                 <motion.div
@@ -489,7 +489,7 @@ export function ApplyPage() {
                 {error}
               </p>
             )}
-            <div className="mt-8 flex gap-4 border-t pt-6">
+            <div className="mt-8 flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row">
               {currentStep > 1 && (
                 <Button
                   variant="outline"

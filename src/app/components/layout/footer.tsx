@@ -61,8 +61,8 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
   ];
 
   return (
-    <footer className={cn('bg-neutral-900 text-white', className)}>
-      <div className="container mx-auto px-4 py-12 sm:px-6 md:py-16 lg:px-8">
+    <footer className={cn('relative overflow-hidden bg-slate-950 text-white', className)}>
+      <div className="container relative z-10 mx-auto px-4 py-14 sm:px-6 md:py-20 lg:px-8">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12 lg:grid-cols-4">
           {/* Brand Section */}
           <div className="lg:col-span-1">
@@ -98,7 +98,7 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
                   <a
                     key={social}
                     href="#"
-                    className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-800 transition-colors hover:bg-primary-600"
+                    className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 text-slate-300 ring-1 ring-white/10 transition-all hover:-translate-y-0.5 hover:bg-primary-600 hover:text-white"
                     aria-label={social}
                   >
                     <svg
@@ -134,7 +134,7 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
                   <li key={link.href}>
                     <Link
                       to={link.href}
-                      className="text-sm text-neutral-400 transition-colors hover:text-white"
+                      className="text-sm text-slate-400 transition-colors hover:text-white"
                     >
                       {link.label}
                     </Link>
@@ -162,7 +162,7 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 border-t border-neutral-800 pt-8">
+        <div className="mt-14 border-t border-white/10 pt-8">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <p className="text-center text-sm text-neutral-400 md:text-right">
               © {new Date().getFullYear()} {content.brand.nameAr}. {text(content.footer.copyright)}.
@@ -170,13 +170,13 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
             <div className="flex gap-6">
               <Link
                 to="/privacy"
-                className="text-sm text-neutral-400 transition-colors hover:text-white"
+                className="text-sm text-slate-400 transition-colors hover:text-white"
               >
                 {text(content.footer.privacyLabel)}
               </Link>
               <Link
                 to="/terms"
-                className="text-sm text-neutral-400 transition-colors hover:text-white"
+                className="text-sm text-slate-400 transition-colors hover:text-white"
               >
                 {text(content.footer.termsLabel)}
               </Link>

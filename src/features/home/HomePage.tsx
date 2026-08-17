@@ -40,29 +40,29 @@ const HomePage: React.FC = () => {
         {/* Grid Pattern Overlay */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9IkMwIDBoNjB2NjBIMHoiLz48cGF0aCBkPSJNMzAgMzBtLTEgMGExIDEgMCAxIDAgMiAwYTEgMSAwIDEgMCAtMiAwIiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMSIvPjwvZz48L3N2Zz4=')] opacity-20" />
 
-        <div className="container relative z-10 mx-auto px-4 py-20 sm:px-6 lg:px-8">
+        <div className="container relative z-10 mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:py-24">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0, 0, 0.2, 1] }}
-            className="mx-auto max-w-4xl text-center"
+            className="max-w-3xl text-center lg:text-right"
           >
             <Badge variant="secondary" size="lg" className="mb-6">
               {getSiteText(home.heroEyebrow)}
             </Badge>
 
-            <h1 className="mb-6 text-4xl font-bold leading-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+            <h1 className="mb-6 text-4xl font-black leading-[1.15] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
               {getSiteText(home.heroTitle)}
               <span className="mt-2 block text-secondary-300">
                 {getSiteText(home.heroHighlight)}
               </span>
             </h1>
 
-            <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-primary-100 sm:text-xl">
+            <p className="mx-auto mb-10 max-w-2xl text-lg leading-8 text-primary-100 sm:text-xl lg:mx-0">
               {getSiteText(home.heroDescription)}
             </p>
 
-            <div className="flex flex-col justify-center gap-4 sm:flex-row">
+            <div className="flex flex-col justify-center gap-4 sm:flex-row lg:justify-start">
               <Button
                 size="lg"
                 variant="secondary"
@@ -96,6 +96,50 @@ const HomePage: React.FC = () => {
               </Button>
             </div>
           </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: -24 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.25, duration: 0.7 }}
+            className="hero-panel relative mx-auto w-full max-w-md lg:mx-0"
+          >
+            <div className="mb-6 flex items-center justify-between gap-4">
+              <div>
+                <p className="mb-1 text-sm font-semibold text-secondary-200">فرصتك القادمة</p>
+                <p className="text-xl font-bold text-white">ابدأ بخطوة واحدة</p>
+              </div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 text-white ring-1 ring-white/20" aria-hidden="true">
+                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="m12 2 1.9 6.1L20 10l-6.1 1.9L12 18l-1.9-6.1L4 10l6.1-1.9L12 2Zm7 14 .8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16Z" />
+                </svg>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {featuredJobs.slice(0, 2).map((job) => (
+                <Link
+                  key={job.id}
+                  to={`/jobs/${job.id}`}
+                  className="group flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/10 p-4 transition-all hover:-translate-y-0.5 hover:bg-white/15"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-bold text-white">{job.title.ar}</p>
+                    <p className="mt-1 text-sm text-primary-100">{job.location.city} · {CATEGORY_LABELS[job.category]?.ar || job.category}</p>
+                  </div>
+                  <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-secondary-400/90 text-primary-950 transition-transform group-hover:-translate-x-1">←</span>
+                </Link>
+              ))}
+            </div>
+
+            <div className="mt-6 grid grid-cols-2 gap-3 border-t border-white/15 pt-5">
+              {home.stats.slice(0, 2).map((stat) => (
+                <div key={stat.label.ar} className="rounded-2xl bg-black/10 p-3">
+                  <p className="text-2xl font-black text-white">{stat.value}</p>
+                  <p className="mt-1 text-xs text-primary-100">{getSiteText(stat.label)}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
         </div>
 
         {/* Scroll Indicator */}
@@ -116,22 +160,22 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="bg-white py-16">
+      <section className="relative bg-white py-12 sm:py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             variants={staggerContainer}
             initial="initial"
             whileInView="animate"
             viewport={{ once: true, margin: '-100px' }}
-            className="grid grid-cols-2 gap-8 md:grid-cols-4"
+            className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6"
           >
             {home.stats.map((stat) => (
               <motion.div
                 key={stat.label.ar}
                 variants={fadeAnimations.fadeInUp}
-                className="text-center"
+                className="stat-tile"
               >
-                <div className="mb-2 text-4xl font-bold text-primary-600 sm:text-5xl">
+                <div className="mb-2 text-3xl font-black text-primary-700 sm:text-5xl">
                   {stat.value}
                 </div>
                 <div className="text-text-secondary font-medium">
@@ -374,7 +418,7 @@ const HomePage: React.FC = () => {
                         className="h-4 w-4"
                         fill="none"
                         stroke="currentColor"
-                        viewBox="0 0 24/24"
+                        viewBox="0 0 24 24"
                       >
                         <path
                           strokeLinecap="round"
@@ -517,7 +561,7 @@ const HomePage: React.FC = () => {
                           key={i}
                           className="h-5 w-5 text-warning-500"
                           fill="currentColor"
-                          viewBox="0 0/20 20"
+                          viewBox="0 0 20 20"
                         >
                           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>

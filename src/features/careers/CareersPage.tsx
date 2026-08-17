@@ -144,7 +144,7 @@ const CareersPage: React.FC = () => {
   return (
     <div className="bg-background-alternate min-h-screen" dir="rtl">
       {/* Header */}
-      <section className="bg-gradient-to-br from-primary-700 to-primary-900 py-16 text-white md:py-24">
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary-800 via-primary-700 to-primary-950 py-20 text-white md:py-28">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -163,9 +163,9 @@ const CareersPage: React.FC = () => {
       </section>
 
       {/* Filters Section */}
-      <section className="border-border-default sticky top-16 z-20 border-b bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-4 lg:flex-row">
+      <section className="border-border-default sticky top-16 z-20 border-b bg-white/95 shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur-xl md:top-20">
+        <div className="container mx-auto px-4 py-5 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
             {/* Search */}
             <div className="flex-1">
               <Input
@@ -210,8 +210,8 @@ const CareersPage: React.FC = () => {
           </div>
 
           {/* Results count */}
-          <div className="mt-4 flex items-center justify-between">
-            <p className="text-text-secondary text-sm">
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+            <p className="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-600">
               عرض {paginatedJobs.length} من {filteredJobs.length} وظيفة
             </p>
             {(categoryFilter !== 'all' ||
@@ -277,7 +277,7 @@ const CareersPage: React.FC = () => {
             >
               {paginatedJobs.map((job) => (
                 <motion.div key={job.id} variants={fadeAnimations.fadeInUp}>
-                  <Card hoverable className="h-full">
+                  <Card hoverable className="h-full overflow-hidden border-slate-200/80 shadow-[0_14px_35px_rgba(15,23,42,0.05)]">
                     <div className="p-6">
                       <div className="mb-3 flex items-start justify-between">
                         <Badge variant="primary" size="sm">

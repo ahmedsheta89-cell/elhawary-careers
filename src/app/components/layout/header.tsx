@@ -32,12 +32,12 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
   return (
     <header
       className={cn(
-        'border-border-default sticky top-0 z-sticky w-full border-b bg-white/80 backdrop-blur-md',
+        'border-border-default sticky top-0 z-sticky w-full border-b bg-white/90 shadow-[0_8px_30px_rgba(15,23,42,0.04)] backdrop-blur-xl',
         className
       )}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between md:h-20">
+        <div className="flex min-h-16 items-center justify-between md:min-h-20">
           {/* Logo */}
           <Link to="/" className="group flex items-center gap-3">
             <motion.div
@@ -45,7 +45,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
               whileTap={{ scale: 0.95 }}
               className="flex items-center gap-3"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary-600 to-primary-700 shadow-lg transition-shadow group-hover:shadow-xl md:h-12 md:w-12">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 shadow-lg transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-xl md:h-12 md:w-12">
                 <svg
                   className="h-6 w-6 text-white md:h-7 md:w-7"
                   fill="none"
@@ -78,10 +78,10 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                 key={item.key}
                 to={item.path}
                 className={cn(
-                  'rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200',
+                  'rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200',
                   isActive(item.path)
-                    ? 'bg-primary-50 text-primary-600'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-neutral-100'
+                    ? 'bg-primary-50 text-primary-700 shadow-sm ring-1 ring-primary-100'
+                    : 'text-text-secondary hover:bg-slate-50 hover:text-text-primary'
                 )}
               >
                 {getSiteText(content.header[`${item.key}Label` as keyof typeof content.header] ?? { ar: item.labelAr, en: item.labelAr })}
@@ -117,8 +117,10 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="text-text-secondary hover:text-text-primary rounded-lg p-2 transition-colors hover:bg-neutral-100 md:hidden"
-            aria-label="Toggle menu"
+            className="text-text-secondary hover:text-text-primary rounded-xl p-2.5 transition-colors hover:bg-neutral-100 md:hidden"
+            aria-label={isMobileMenuOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-navigation"
           >
             <AnimatePresence mode="wait">
               {isMobileMenuOpen ? (
@@ -170,6 +172,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.2 }}
+              id="mobile-navigation"
               className="border-border-default overflow-hidden border-t md:hidden"
             >
               <nav className="space-y-2 py-4">
@@ -179,10 +182,10 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                     to={item.path}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={cn(
-                      'block rounded-lg px-4 py-3 text-base font-medium transition-all duration-200',
+                      'block rounded-xl px-4 py-3 text-base font-semibold transition-all duration-200',
                       isActive(item.path)
-                        ? 'bg-primary-50 text-primary-600'
-                        : 'text-text-secondary hover:text-text-primary hover:bg-neutral-100'
+                        ? 'bg-primary-50 text-primary-700 shadow-sm ring-1 ring-primary-100'
+                        : 'text-text-secondary hover:bg-slate-50 hover:text-text-primary'
                     )}
                   >
                     {getSiteText(content.header[`${item.key}Label` as keyof typeof content.header] ?? { ar: item.labelAr, en: item.labelAr })}
