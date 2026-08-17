@@ -4,6 +4,7 @@ import { Button } from '@/app/components/ui/button';
 import { Card } from '@/app/components/ui/card';
 import { Input, Textarea } from '@/app/components/ui/input';
 import { config } from '@/config';
+import { toWhatsAppLinkNumber } from '@/services/siteSettingsService';
 import {
   EDUCATION_LEVELS,
   EXPERIENCE_LEVELS,
@@ -114,6 +115,36 @@ function downloadJsonFile(filename: string, value: unknown) {
   anchor.download = filename;
   anchor.click();
   URL.revokeObjectURL(url);
+}
+
+function playNotificationSound() {
+  if (typeof window === 'undefined') return;
+  const AudioContextConstructor =
+    window.AudioContext ??
+    (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AudioContextConstructor) return;
+  const context = new AudioContextConstructor();
+  const oscillator = context.createOscillator();
+  const gain = context.createGain();
+  oscillator.type = 'sine';
+  oscillator.frequency.setValueAtTime(880, context.currentTime);
+  oscillator.frequency.exponentialRampToValueAtTime(660, context.currentTime + 0.16);
+  gain.gain.setValueAtTime(0.0001, context.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.12, context.currentTime + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.22);
+  oscillator.connect(gain);
+  gain.connect(context.destination);
+  oscillator.start();
+  oscillator.stop(context.currentTime + 0.24);
+  oscillator.addEventListener('ended', () => void context.close(), { once: true });
+}
+
+function getApplicationWhatsappUrl(application: AdminApplication, jobTitle: string) {
+  const phone = toWhatsAppLinkNumber(application.whatsappNumber ?? application.phone);
+  const message = encodeURIComponent(
+    `مرحباً ${application.fullName}، معك فريق التوظيف في صيدلية الهواري بخصوص طلبك لوظيفة ${jobTitle}. سنتواصل معك لاستكمال إجراءات المراجعة.`
+  );
+  return `https://wa.me/${phone}?text=${message}`;
 }
 
 function withoutId(job: Job): JobAdminInput {
@@ -234,6 +265,9 @@ export function AdminPage() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(
     typeof Notification !== 'undefined' && Notification.permission === 'granted'
   );
+  const [soundEnabled, setSoundEnabled] = useState(() =>
+    typeof window !== 'undefined' && localStorage.getItem('elhawary_hr_alert_sound') === 'on'
+  );
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
   const [googleSheetsSettings, setGoogleSheetsSettings] = useState<GoogleSheetsSettings>({
@@ -318,36 +352,30 @@ export function AdminPage() {
     let knownApplicationIds: Set<string> | null = null;
     let cancelled = false;
 
-    const refreshApplications = async () => {
-      try {
-        const latest = await adminService.getApplications();
-        if (cancelled) return;
-        const latestIds = new Set(latest.map((application) => application.id));
-        if (knownApplicationIds) {
-          const added = latest.filter((application) => !knownApplicationIds?.has(application.id));
-          if (added.length > 0) {
-            setNewApplicationCount((current) => current + added.length);
-            if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-              new Notification('طلب توظيف جديد - El Hawary Careers', {
-                body: `وصل ${added.length} طلب جديد إلى لوحة الإدارة.`,
-              });
-            }
+    const unsubscribe = adminService.subscribeApplications((latest) => {
+      if (cancelled) return;
+      const latestIds = new Set(latest.map((application) => application.id));
+      if (knownApplicationIds) {
+        const added = latest.filter((application) => !knownApplicationIds?.has(application.id));
+        if (added.length > 0) {
+          setNewApplicationCount((current) => current + added.length);
+          if (soundEnabled) playNotificationSound();
+          if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+            new Notification('طلب توظيف جديد - El Hawary Careers', {
+              body: `وصل ${added.length} طلب جديد إلى لوحة الإدارة.`,
+            });
           }
         }
-        knownApplicationIds = latestIds;
-        setApplications(latest);
-      } catch (refreshError) {
-        console.error('Application refresh failed', refreshError);
       }
-    };
+      knownApplicationIds = latestIds;
+      setApplications(latest);
+    });
 
-    void refreshApplications();
-    const intervalId = window.setInterval(() => void refreshApplications(), 60_000);
     return () => {
       cancelled = true;
-      window.clearInterval(intervalId);
+      unsubscribe();
     };
-  }, [role, user]);
+  }, [role, soundEnabled, user]);
 
   const enableBrowserNotifications = async () => {
     if (typeof Notification === 'undefined') {
@@ -359,6 +387,12 @@ export function AdminPage() {
     if (permission !== 'granted') {
       setError('لم يتم السماح بتنبيهات المتصفح. يمكنك تفعيلها من إعدادات المتصفح.');
     }
+  };
+
+  const enableAlertSound = () => {
+    playNotificationSound();
+    setSoundEnabled(true);
+    localStorage.setItem('elhawary_hr_alert_sound', 'on');
   };
 
   const saveSiteContentSettings = async (event: FormEvent) => {
@@ -1661,6 +1695,15 @@ export function AdminPage() {
                   type="button"
                   size="sm"
                   variant="outline"
+                  onClick={enableAlertSound}
+                  disabled={soundEnabled}
+                >
+                  {soundEnabled ? 'صوت التنبيه مفعّل' : 'تفعيل صوت التنبيه'}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
                   onClick={() => downloadApplicationsCsv(filteredApplications, jobs)}
                   disabled={filteredApplications.length === 0}
                 >
@@ -1814,11 +1857,14 @@ export function AdminPage() {
                       <p className="mt-1 text-slate-500">{application.phone}</p>
                       <a
                         className="mt-2 inline-flex font-bold text-emerald-600 hover:text-emerald-700"
-                        href={`https://wa.me/${(application.whatsappNumber ?? application.phone).replace(/[^0-9]/g, '')}`}
+                        href={getApplicationWhatsappUrl(
+                          application,
+                          jobs.find((job) => job.id === application.jobId)?.title.ar ?? application.jobId
+                        )}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        واتساب:{' '}
+                        مراسلة واتساب:{' '}
                         {application.whatsappNumber ?? application.phone}
                       </a>
                     </td>

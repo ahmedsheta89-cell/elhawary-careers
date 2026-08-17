@@ -13,6 +13,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  onSnapshot,
   orderBy,
   query,
   setDoc,
@@ -165,6 +166,21 @@ class AdminService {
     return snapshot.docs.map(
       (item) => ({ id: item.id, ...item.data() }) as AdminApplication
     );
+  }
+
+  subscribeApplications(callback: (applications: AdminApplication[]) => void) {
+    const { db } = requireFirebase();
+    const applicationsQuery = query(
+      collection(db, 'applications'),
+      orderBy('submittedAt', 'desc')
+    );
+    return onSnapshot(applicationsQuery, (snapshot) => {
+      callback(
+        snapshot.docs.map(
+          (item) => ({ id: item.id, ...item.data() }) as AdminApplication
+        )
+      );
+    });
   }
 
   async updateApplicationStatus(
