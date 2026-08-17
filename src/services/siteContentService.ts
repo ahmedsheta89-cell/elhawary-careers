@@ -250,11 +250,11 @@ export const defaultSiteContent: SiteContent = {
     },
     benefits: {
       eyebrow: text('المزايا والعوائد'),
-      title: text('لماذا نعمل في صيدلية الهواري؟'),
+      title: text('لماذا تنضم إلى صيدلية الهواري؟'),
       description: text('نقدم حزمة شاملة من المزايا والعوائد لدعمك أنت وعائلتك'),
       items: [
         { icon: 'health', title: text('تأمين صحي شامل'), description: text('تغطية صحية لك ولعائلتك في أفضل المستشفيات') },
-        { icon: 'growth', title: text('تطوير مهني'), description: text('برامج تدريبية مستمرة وفرص advancement') },
+        { icon: 'growth', title: text('تطوير مهني'), description: text('برامج تدريبية مستمرة وفرص للنمو والتطور المهني') },
         { icon: 'bonus', title: text('مكافآت وحوافز'), description: text('مكافآت أداء سنوية وعمولات مجزية') },
         { icon: 'balance', title: text('توازن الحياة'), description: text('ساعات عمل مرنة وإجازات مدفوعة') },
         { icon: 'transport', title: text('بدل مواصلات'), description: text('بدل مواصلات شهري أو خدمة نقل') },
