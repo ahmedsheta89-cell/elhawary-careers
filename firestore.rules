@@ -65,6 +65,7 @@ service cloud.firestore {
       && request.resource.data.address.size() <= 300
       && request.resource.data.education is map
       && request.resource.data.education.keys().hasAll(['degree', 'institution', 'graduationYear'])
+      && request.resource.data.education.keys().hasOnly(['degree', 'institution', 'graduationYear', 'grade'])
       && request.resource.data.education.degree is string
       && request.resource.data.education.degree.size() >= 2
       && request.resource.data.education.degree.size() <= 160
@@ -72,8 +73,12 @@ service cloud.firestore {
       && request.resource.data.education.institution.size() >= 2
       && request.resource.data.education.institution.size() <= 200
       && request.resource.data.education.graduationYear is number
+      && (!request.resource.data.education.keys().hasAny(['grade'])
+        || (request.resource.data.education.grade is string
+          && request.resource.data.education.grade.size() <= 80))
       && request.resource.data.experience is map
       && request.resource.data.experience.keys().hasAll(['company', 'position', 'startDate'])
+      && request.resource.data.experience.keys().hasOnly(['company', 'position', 'startDate', 'endDate', 'description'])
       && request.resource.data.experience.company is string
       && request.resource.data.experience.company.size() >= 2
       && request.resource.data.experience.company.size() <= 160
@@ -82,6 +87,15 @@ service cloud.firestore {
       && request.resource.data.experience.position.size() <= 160
       && request.resource.data.experience.startDate is string
       && request.resource.data.experience.startDate.size() >= 1
+      && (!request.resource.data.experience.keys().hasAny(['endDate'])
+        || (request.resource.data.experience.endDate is string
+          && request.resource.data.experience.endDate.size() <= 30))
+      && (!request.resource.data.experience.keys().hasAny(['description'])
+        || (request.resource.data.experience.description is string
+          && request.resource.data.experience.description.size() <= 2000))
+      && (!request.resource.data.keys().hasAny(['bio'])
+        || (request.resource.data.bio is string
+          && request.resource.data.bio.size() <= 2000))
       && request.resource.data.privacyConsent == true
       && request.resource.data.cvDelivery == 'whatsapp'
       && request.resource.data.cvReceived == false;
